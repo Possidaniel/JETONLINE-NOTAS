@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)file:///C:/Users/daniel.possi/Downloads/conferencia_nfs_35.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conferência de NFs (XML)</title>
+<script src="./INDEX_files/exceljs.min.js.baixados"></script>
+<script src="./INDEX_files/supabase-js@2"></script>
+<script src="./INDEX_files/chart.umd.min.js.baixados"></script>
+<style>
+  :root{
+    --bg:#050505; --card:#121212; --line:#2a2a2a; --txt:#f5f5f5;
+    --muted:#9a9a9a; --accent:#f8de07; --accent2:#f8de07; --danger:#ef4444;
+    --drop:#1a1a1a; --brand:#f8de07; --brand-dark:#050505;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--txt);padding:24px}
+  .wrap{max-width:1800px;margin:0 auto;padding:0 24px}
+  /* Tela de login */
+  #loginGate{position:fixed;inset:0;background:#050505;display:flex;align-items:center;justify-content:center;z-index:9999}
+  .loginbox{background:#121212;border:1px solid #2a2a2a;border-top:4px solid #f8de07;border-radius:14px;padding:36px 32px;width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .loginlogo{height:54px;margin-bottom:18px}
+  .loginbox h2{margin:0 0 4px;font-size:19px;color:#f5f5f5}
+  .loginbox p{margin:0 0 22px;font-size:13px;color:#9a9a9a}
+  .loginbox input{width:100%;box-sizing:border-box;background:#1a1a1a;border:1px solid #2a2a2a;color:#f5f5f5;padding:12px 14px;border-radius:9px;font-size:15px;margin-bottom:12px}
+  .loginbox input:focus{outline:none;border-color:#f8de07}
+  .loginbox button{width:100%;background:#f8de07;color:#050505;border:0;padding:12px;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer}
+  .loginerr{color:#ef4444;font-size:13px;margin-top:12px;min-height:16px}
+  h1{font-size:22px;margin:0 0 4px}
+  .brandbar{display:flex;align-items:center;gap:18px;margin-bottom:18px;padding-bottom:16px;border-bottom:2px solid var(--brand)}
+  .brandlogo{height:64px;width:auto}
+  .brandbar h1{font-size:22px;margin:0}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:20px}
+
+  /* NAV DE TELAS */
+  .nav{display:flex;gap:8px;margin-bottom:22px;border-bottom:1px solid var(--line)}
+  .nav button{background:transparent;border:0;border-bottom:3px solid transparent;color:var(--muted);
+    padding:12px 20px;font-size:15px;font-weight:600;cursor:pointer;border-radius:0}
+  .nav button.active{color:var(--txt);border-bottom-color:var(--accent)}
+
+  .drop{border:2px dashed var(--line);border-radius:14px;background:var(--drop);
+    padding:44px 24px;text-align:center;cursor:pointer;transition:.15s}
+  .drop.hover{border-color:var(--accent);background:#1d1d1d}
+  .drop h2{margin:0 0 6px;font-size:18px}
+  .drop p{margin:0;color:var(--muted);font-size:14px}
+  .bar{display:flex;gap:10px;margin:18px 0;flex-wrap:wrap}
+  button{background:var(--accent);color:#050505;border:0;padding:10px 18px;border-radius:9px;font-size:14px;cursor:pointer;font-weight:700}
+  button.green{background:var(--accent2);color:#050505}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .files{margin:24px 0 14px}
+  .file{display:flex;justify-content:space-between;align-items:center;background:var(--card);
+    border:1px solid var(--line);border-radius:9px;padding:10px 14px;margin-bottom:8px;font-size:13px;gap:12px}
+  .file .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .file .st{font-size:12px;color:var(--muted);white-space:nowrap}
+  .file .ok{color:var(--accent2)}
+  .file .err{color:var(--danger)}
+
+  .totals{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0}
+  .tcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .tcard .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .tcard .val{font-size:26px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums}
+  .tcard.cfop{padding:14px 16px}
+  .cfop-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:14px;border-bottom:1px solid var(--line)}
+  .cfop-row:last-child{border-bottom:0}
+  .cfop-tag{display:inline-flex;align-items:center;gap:7px;font-weight:600}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .cfop-val{font-variant-numeric:tabular-nums}
+
+  table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;white-space:nowrap}
+  th{background:var(--card);position:sticky;top:0}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  td.desc{max-width:300px;overflow:hidden;text-overflow:ellipsis}
+  td.cfopcell{font-weight:600}
+  .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600}
+  .badge.ok{background:rgba(34,197,94,.15);color:#4ade80}
+  .badge.cancel{background:rgba(239,68,68,.15);color:#f87171}
+  .badge.warn{background:rgba(234,179,8,.15);color:#facc15}
+  .filtertoggle{display:flex;align-items:center;gap:9px;margin:4px 0 0;font-size:13px;color:var(--muted);cursor:pointer;user-select:none}
+  .filtertoggle input{width:16px;height:16px;cursor:pointer}
+  .tcard.danger .val{color:#f87171}
+  /* Bloco de banco de dados */
+  .dbsection{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:18px 0}
+  .dbsection h3{margin:0 0 12px;font-size:15px;font-weight:600}
+  .dbrow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+  .dbfield{display:flex;flex-direction:column;gap:4px}
+  .dbfield label{font-size:12px;color:var(--muted)}
+  .dbfield input,.dbfield select{background:var(--drop);border:1px solid var(--line);color:var(--txt);
+    padding:9px 11px;border-radius:8px;font-size:14px;min-width:150px}
+  button.purple{background:#7c3aed;color:#fff}
+  button.danger{background:#dc2626;color:#fff}
+  .delrow{background:transparent;border:0;color:#f87171;cursor:pointer;font-size:15px;padding:2px 6px}
+  .rowchk,#selAll-ent,#selAll-sai{width:16px;height:16px;cursor:pointer}
+  .dbmsg{font-size:13px;margin-top:10px;min-height:18px}
+  .dbmsg.ok{color:var(--accent2)} .dbmsg.err{color:var(--danger)}
+  .dbhint{font-size:12px;color:var(--muted);margin-top:6px}
+  /* Abas de visão (importados / banco) */
+  .viewtabs{display:flex;gap:8px;margin:18px 0 0}
+  .viewtabs button{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:9px 16px;border-radius:9px 9px 0 0;font-size:14px;font-weight:600;cursor:pointer}
+  .viewtabs button.active{background:var(--drop);color:var(--txt);border-bottom-color:var(--drop)}
+  .viewpane{display:none}
+  .viewpane.active{display:block}
+  /* Dashboard */
+  .dashgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+  @media(max-width:900px){.dashgrid{grid-template-columns:1fr}}
+  .dashcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .dashcard h4{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--txt)}
+  .dashcard canvas{max-height:300px}
+  .rankhead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:12px;flex-wrap:wrap}
+  .rankhead .dbfield select{min-width:170px}
+  .tablewrap{max-height:460px;overflow:auto;border-radius:10px;border:1px solid var(--line)}
+  .count{color:var(--muted);font-size:13px;margin-top:10px}
+  .empty{color:var(--muted);padding:30px;text-align:center}
+  .screen{display:none}
+  .screen.active{display:block}
+</style>
+</head>
+<body>
+<div id="loginGate" style="display: none;">
+  <div class="loginbox">
+    <img src="data:image/png;base64,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" alt="JET Online" class="loginlogo">
+    <h2>Conferência de NFs</h2>
+    <p>Acesso restrito · JetOnline</p>
+    <input type="email" id="loginEmail" placeholder="E-mail" autocomplete="username">
+    <input type="password" id="loginPwd" placeholder="Senha de acesso" autocomplete="current-password">
+    <button id="loginBtn">Entrar</button>
+    <div class="loginerr" id="loginErr"></div>
+  </div>
+</div>
+<div class="wrap" id="appWrap" style="display: block;">
+  <div class="brandbar">
+    <img src="data:image/png;base64,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" alt="JET Online" class="brandlogo">
+    <div style="flex:1">
+      <h1>Conferência de NFs</h1>
+      <div class="sub">Importe os XMLs das notas e exporte para Excel estilizado, com cores por CFOP. Tudo roda no seu navegador.</div>
+    </div>
+    <button class="ghost" id="btnSair" style="align-self:flex-start">Sair</button>
+  </div>
+
+  <div class="nav">
+    <button id="tab-ent" class="active" data-screen="ent">Conferência NF Entradas</button>
+    <button id="tab-sai" data-screen="sai">Conferência NF Saídas</button>
+    <button id="tab-dash" data-screen="dash">📊 Dashboard de Vendas</button>
+    <button id="tab-dashc" data-screen="dashc">📦 Dashboard de Compras</button>
+  </div>
+
+  <!-- ============ TELA ENTRADAS ============ -->
+  <div class="screen active" id="screen-ent">
+    <div class="drop" id="drop-ent">
+      <h2>📄 Arraste os XMLs de ENTRADA aqui</h2>
+      <p>ou clique para selecionar os arquivos</p>
+      <input type="file" id="input-ent" accept=".xml,text/xml,application/xml" multiple="" hidden="">
+    </div>
+    <div class="bar">
+      <button class="green" id="export-ent" disabled="">⬇ Excel (blocos por nota)</button>
+      <button class="green" id="exportList-ent" disabled="">⬇ Excel (lista)</button>
+      <button class="ghost" id="clear-ent" disabled="">Limpar tudo</button>
+    </div>
+
+    <div class="dbsection">
+      <h3>💾 Salvar entradas no banco</h3>
+      <div class="dbrow">
+        <div class="dbfield">
+          <label>Mês de competência (escrituração)</label>
+          <input type="month" id="mesRef-ent">
+        </div>
+        <button class="purple" id="saveDb-ent" disabled="">Salvar no banco</button>
+      </div>
+      <div class="dbhint">Defina o mês em que estas notas entram no controle de crédito (pode ser diferente da emissão).</div>
+      <div class="dbmsg" id="dbmsg-ent"></div>
+    </div>
+
+    <label class="filtertoggle" id="filtertoggle-ent" style="display:none"><input type="checkbox" id="incCancel-ent"> Incluir NFs canceladas nos totais</label>
+    <div class="totals" id="totals-ent"></div>
+
+    <div class="viewtabs">
+      <button id="vtab-imp-ent" class="active" data-view="imp">📥 Importados agora</button>
+      <button id="vtab-db-ent" data-view="db">🗄 Registros do banco</button>
+    </div>
+
+    <!-- VISÃO: IMPORTADOS AGORA -->
+    <div class="viewpane active" id="vpane-imp-ent">
+      <div class="tablewrap" style="border-radius:0 0 10px 10px">
+        <table>
+          <thead><tr><th>Nº NF</th><th>Emitente</th><th>Natureza Op.</th><th>UF</th><th>Referência</th><th>Descrição</th><th>NCM</th><th>CFOP</th><th class="num">Qtd</th><th class="num">Vlr Total</th><th class="num">Vlr ICMS</th><th class="num">ICMS Subst.</th><th class="num">Créd. Individual</th><th class="num">ICMS ST Ret.</th><th class="num">Créd. ST Individual</th><th>Status</th></tr></thead>
+          <tbody id="tbody-ent"><tr><td colspan="16" class="empty">Nenhum item extraído ainda.</td></tr></tbody>
+        </table>
+      </div>
+      <div class="count" id="count-ent"></div>
+      <div class="files" id="files-ent"></div>
+    </div>
+
+    <!-- VISÃO: BANCO -->
+    <div class="viewpane" id="vpane-db-ent">
+      <div class="dbsection" style="border-radius:0 0 12px 12px">
+        <h3>🔎 Consultar / apagar entradas no banco</h3>
+        <div class="dbrow">
+          <div class="dbfield"><label>Nº NF</label><input type="text" id="qNf-ent" placeholder="ex: 125105"></div>
+          <div class="dbfield"><label>Emitente</label><input type="text" id="qTexto-ent" placeholder="razão social"></div>
+          <div class="dbfield"><label>Mês competência</label><input type="month" id="qMes-ent"></div>
+          <div class="dbfield"><label>Envio de</label><input type="date" id="qEnvioDe-ent"></div>
+          <div class="dbfield"><label>Envio até</label><input type="date" id="qEnvioAte-ent"></div>
+          <button id="search-ent">Buscar</button>
+          <button class="ghost" id="searchClear-ent">Limpar</button>
+          <button class="green" id="searchXlsx-ent" disabled="">⬇ Excel</button>
+        </div>
+        <div class="dbrow" style="margin-top:10px">
+          <div class="dbfield"><label>Apagar NF inteira (por Nº NF)</label><input type="text" id="delNf-ent" placeholder="Nº da NF a apagar"></div>
+          <button class="danger" id="delNfBtn-ent">🗑 Apagar NF</button>
+          <button class="danger" id="delSelBtn-ent" disabled="">🗑 Apagar selecionados (<span id="selCount-ent">0</span>)</button>
+        </div>
+        <div class="dbmsg" id="qmsg-ent"></div>
+        <div class="totals" id="qtotals-ent" style="margin-top:14px"></div>
+        <div class="tablewrap" style="margin-top:12px;max-height:440px">
+          <table>
+            <thead><tr><th><input type="checkbox" id="selAll-ent" title="Selecionar todos"></th><th>Mês</th><th>Envio</th><th>Nº NF</th><th>Emitente</th><th>Natureza Op.</th><th>UF</th><th>Referência</th><th>Descrição</th><th>NCM</th><th>CFOP</th><th class="num">Qtd</th><th class="num">Vlr Total</th><th class="num">Vlr ICMS</th><th class="num">ICMS Subst.</th><th class="num">Créd. Individual</th><th class="num">ICMS ST Ret.</th><th class="num">Créd. ST Individual</th><th>Status</th><th></th></tr></thead>
+            <tbody id="qbody-ent"><tr><td colspan="20" class="empty">Faça uma busca para ver os registros salvos.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TELA SAIDAS ============ -->
+  <div class="screen" id="screen-sai">
+    <div class="drop" id="drop-sai">
+      <h2>📄 Arraste os XMLs de SAÍDA aqui</h2>
+      <p>ou clique para selecionar os arquivos</p>
+      <input type="file" id="input-sai" accept=".xml,text/xml,application/xml" multiple="" hidden="">
+    </div>
+    <div class="bar">
+      <button class="green" id="export-sai" disabled="">⬇ Excel (blocos por nota)</button>
+      <button class="green" id="exportList-sai" disabled="">⬇ Excel (lista)</button>
+      <button class="ghost" id="clear-sai" disabled="">Limpar tudo</button>
+    </div>
+
+    <div class="dbsection">
+      <h3>💾 Salvar saídas no banco</h3>
+      <div class="dbrow">
+        <button class="purple" id="saveDb-sai" disabled="">Salvar no banco</button>
+      </div>
+      <div class="dbhint">O mês de competência é definido automaticamente pela data de emissão de cada nota.</div>
+      <div class="dbmsg" id="dbmsg-sai"></div>
+    </div>
+
+    <label class="filtertoggle" id="filtertoggle-sai" style="display:none"><input type="checkbox" id="incCancel-sai"> Incluir NFs canceladas nos totais</label>
+    <div class="totals" id="totals-sai"></div>
+
+    <div class="viewtabs">
+      <button id="vtab-imp-sai" class="active" data-view="imp">📥 Importados agora</button>
+      <button id="vtab-db-sai" data-view="db">🗄 Registros do banco</button>
+    </div>
+
+    <!-- VISÃO: IMPORTADOS AGORA -->
+    <div class="viewpane active" id="vpane-imp-sai">
+      <div class="tablewrap" style="border-radius:0 0 10px 10px">
+        <table>
+          <thead><tr><th>Nº NF</th><th>Razão Social</th><th>Natureza Op.</th><th>UF</th><th>Data Emissão</th><th>Série</th><th>Referência</th><th>Descrição</th><th>NCM</th><th>CFOP</th><th class="num">Qtd</th><th class="num">Valor</th><th class="num">BC ICMS</th><th class="num">Vlr ICMS</th><th>Status</th></tr></thead>
+          <tbody id="tbody-sai"><tr><td colspan="15" class="empty">Nenhum item extraído ainda.</td></tr></tbody>
+        </table>
+      </div>
+      <div class="count" id="count-sai"></div>
+      <div class="files" id="files-sai"></div>
+    </div>
+
+    <!-- VISÃO: BANCO -->
+    <div class="viewpane" id="vpane-db-sai">
+      <div class="dbsection" style="border-radius:0 0 12px 12px">
+        <h3>🔎 Consultar / apagar saídas no banco</h3>
+        <div class="dbrow">
+          <div class="dbfield"><label>Nº NF</label><input type="text" id="qNf-sai" placeholder="ex: 29472"></div>
+          <div class="dbfield"><label>Razão Social</label><input type="text" id="qTexto-sai" placeholder="cliente"></div>
+          <div class="dbfield"><label>Mês competência</label><input type="month" id="qMes-sai"></div>
+          <div class="dbfield"><label>Envio de</label><input type="date" id="qEnvioDe-sai"></div>
+          <div class="dbfield"><label>Envio até</label><input type="date" id="qEnvioAte-sai"></div>
+          <button id="search-sai">Buscar</button>
+          <button class="ghost" id="searchClear-sai">Limpar</button>
+          <button class="green" id="searchXlsx-sai" disabled="">⬇ Excel</button>
+        </div>
+        <div class="dbrow" style="margin-top:10px">
+          <div class="dbfield"><label>Apagar NF inteira (por Nº NF)</label><input type="text" id="delNf-sai" placeholder="Nº da NF a apagar"></div>
+          <button class="danger" id="delNfBtn-sai">🗑 Apagar NF</button>
+          <button class="danger" id="delSelBtn-sai" disabled="">🗑 Apagar selecionados (<span id="selCount-sai">0</span>)</button>
+        </div>
+        <div class="dbmsg" id="qmsg-sai"></div>
+        <div class="totals" id="qtotals-sai" style="margin-top:14px"></div>
+        <div class="tablewrap" style="margin-top:12px;max-height:440px">
+          <table>
+            <thead><tr><th><input type="checkbox" id="selAll-sai" title="Selecionar todos"></th><th>Mês</th><th>Envio</th><th>Nº NF</th><th>Razão Social</th><th>Natureza Op.</th><th>UF</th><th>Data Emissão</th><th>Série</th><th>Referência</th><th>Descrição</th><th>NCM</th><th>CFOP</th><th class="num">Qtd</th><th class="num">Valor</th><th class="num">BC ICMS</th><th class="num">Vlr ICMS</th><th>Status</th><th></th></tr></thead>
+            <tbody id="qbody-sai"><tr><td colspan="19" class="empty">Faça uma busca para ver os registros salvos.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TELA DASHBOARD ============ -->
+  <div class="screen" id="screen-dash">
+    <div class="dbsection">
+      <h3>📊 Filtros do dashboard (baseado nas saídas / vendas)</h3>
+      <div class="dbrow">
+        <div class="dbfield"><label>Emissão de</label><input type="date" id="dashDe"></div>
+        <div class="dbfield"><label>Emissão até</label><input type="date" id="dashAte"></div>
+        <div class="dbfield"><label>Atalhos</label>
+          <select id="dashAtalho">
+            <option value="">Personalizado</option>
+            <option value="mes">Mês atual</option>
+            <option value="3m">Últimos 3 meses</option>
+            <option value="6m">Últimos 6 meses</option>
+            <option value="ano">Ano atual</option>
+            <option value="tudo" selected="">Todo o período</option>
+          </select>
+        </div>
+        <div class="dbfield" style="min-width:240px"><label>Evolução de um produto (referência)</label>
+          <input type="text" id="dashProd" placeholder="ex: 11701TG — vazio = todos" list="dashProdList">
+          <datalist id="dashProdList"></datalist>
+        </div>
+        <button class="ghost" id="dashProdClear">Limpar produto</button>
+        <button id="dashBuscar">Atualizar</button>
+      </div>
+      <div class="dbmsg" id="dashMsg"></div>
+    </div>
+
+    <div class="totals" id="dashKpis" style="margin-bottom:6px"></div>
+
+    <div class="dashgrid">
+      <div class="dashcard">
+        <h4>Faturamento por mês</h4>
+        <canvas id="chartFatMes"></canvas>
+      </div>
+      <div class="dashcard">
+        <h4>Quantidade vendida por mês</h4>
+        <canvas id="chartQtdMes"></canvas>
+      </div>
+    </div>
+
+    <div class="dashgrid">
+      <div class="dashcard">
+        <h4>Valor por CFOP</h4>
+        <canvas id="chartValCfop"></canvas>
+      </div>
+      <div class="dashcard">
+        <h4>ICMS por CFOP</h4>
+        <canvas id="chartIcmsCfop"></canvas>
+      </div>
+    </div>
+
+    <div class="dashgrid">
+      <div class="dashcard">
+        <h4>ICMS por mês</h4>
+        <canvas id="chartIcmsMes"></canvas>
+      </div>
+      <div class="dashcard">
+        <h4>Ticket médio por mês (R$/un)</h4>
+        <canvas id="chartTicketMes"></canvas>
+      </div>
+    </div>
+
+    <div class="dbsection">
+      <div class="rankhead">
+        <h3 style="margin:0">🏆 Principais produtos (faturamento e quantidade lado a lado)</h3>
+        <div style="display:flex;gap:12px">
+          <div class="dbfield" style="margin:0"><label>Top N</label>
+            <select id="dashTopN"><option>10</option><option selected="">15</option><option>20</option><option>30</option><option>50</option></select>
+          </div>
+          <div class="dbfield" style="margin:0"><label>Ordenar por</label>
+            <select id="dashOrder"><option value="fat" selected="">Faturamento</option><option value="qtd">Quantidade</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="dbmsg" id="dashRankMsg"></div>
+      <div class="tablewrap" style="max-height:520px">
+        <table>
+          <thead><tr><th>#</th><th>Referência</th><th>Descrição</th><th class="num">Qtd vendida</th><th class="num">Faturamento</th><th class="num">Ticket médio</th><th class="num">Nº NFs</th><th class="num">% do faturamento</th></tr></thead>
+          <tbody id="dashRankBody"><tr><td colspan="8" class="empty">Clique em Atualizar para gerar o ranking.</td></tr></tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px"><button class="green" id="dashXlsx" disabled="">⬇ Exportar ranking (Excel)</button></div>
+    </div>
+  </div>
+
+  <!-- ============ TELA DASHBOARD COMPRAS ============ -->
+  <div class="screen" id="screen-dashc">
+    <div class="dbsection">
+      <h3>📦 Filtros do dashboard (baseado nas entradas / compras)</h3>
+      <div class="dbrow">
+        <div class="dbfield"><label>Emissão de</label><input type="date" id="dcDe"></div>
+        <div class="dbfield"><label>Emissão até</label><input type="date" id="dcAte"></div>
+        <div class="dbfield"><label>Atalhos</label>
+          <select id="dcAtalho">
+            <option value="">Personalizado</option>
+            <option value="mes">Mês atual</option>
+            <option value="3m">Últimos 3 meses</option>
+            <option value="6m">Últimos 6 meses</option>
+            <option value="ano">Ano atual</option>
+            <option value="tudo" selected="">Todo o período</option>
+          </select>
+        </div>
+        <div class="dbfield" style="min-width:240px"><label>Evolução de um produto (referência)</label>
+          <input type="text" id="dcProd" placeholder="ex: 11701TG — vazio = todos" list="dcProdList">
+          <datalist id="dcProdList"></datalist>
+        </div>
+        <button class="ghost" id="dcProdClear">Limpar produto</button>
+        <button id="dcBuscar">Atualizar</button>
+      </div>
+      <div class="dbmsg" id="dcMsg"></div>
+    </div>
+
+    <div class="totals" id="dcKpis" style="margin-bottom:6px"></div>
+
+    <div class="dashgrid">
+      <div class="dashcard"><h4>Valor comprado por mês</h4><canvas id="dcChartFatMes"></canvas></div>
+      <div class="dashcard"><h4>Quantidade comprada por mês</h4><canvas id="dcChartQtdMes"></canvas></div>
+    </div>
+    <div class="dashgrid">
+      <div class="dashcard"><h4>Top produtos por valor comprado</h4><canvas id="dcChartTopFat"></canvas></div>
+      <div class="dashcard"><h4>Top produtos por quantidade</h4><canvas id="dcChartTopQtd"></canvas></div>
+    </div>
+    <div class="dashgrid">
+      <div class="dashcard"><h4>Compras por fornecedor (valor)</h4><canvas id="dcChartForn"></canvas></div>
+      <div class="dashcard"><h4>Valor por CFOP</h4><canvas id="dcChartCfop"></canvas></div>
+    </div>
+    <div class="dashgrid">
+      <div class="dashcard"><h4>ICMS por mês</h4><canvas id="dcChartIcmsMes"></canvas></div>
+      <div class="dashcard"><h4>Custo médio por mês (R$/un)</h4><canvas id="dcChartCustoMes"></canvas></div>
+    </div>
+
+    <div class="dbsection">
+      <div class="rankhead">
+        <h3 style="margin:0">🏆 Principais produtos comprados</h3>
+        <div style="display:flex;gap:12px">
+          <div class="dbfield" style="margin:0"><label>Top N</label>
+            <select id="dcTopN"><option>10</option><option selected="">15</option><option>20</option><option>30</option><option>50</option></select>
+          </div>
+          <div class="dbfield" style="margin:0"><label>Ordenar por</label>
+            <select id="dcOrder"><option value="fat" selected="">Valor comprado</option><option value="qtd">Quantidade</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="dbmsg" id="dcRankMsg"></div>
+      <div class="tablewrap" style="max-height:520px">
+        <table>
+          <thead><tr><th>#</th><th>Referência</th><th>Descrição</th><th class="num">Qtd comprada</th><th class="num">Valor</th><th class="num">Custo médio</th><th class="num">Nº NFs</th><th class="num">% do total</th></tr></thead>
+          <tbody id="dcRankBody"><tr><td colspan="8" class="empty">Clique em Atualizar para gerar o ranking.</td></tr></tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px"><button class="green" id="dcXlsx" disabled="">⬇ Exportar ranking (Excel)</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== CONEXAO SUPABASE (criada cedo, p/ login) =====================
+const SUPABASE_URL = 'https://awfrygolzrygahtmwqmo.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_SKnr9ZL7ASZ77--PYmrflA_C9miRsmO';
+let sb = null;
+try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }
+catch(e){ console.error('Supabase nao inicializado', e); }
+
+// ===================== CONTROLE DE ACESSO (login real via Supabase Auth) =====================
+(function(){
+  const gate=document.getElementById('loginGate'), app=document.getElementById('appWrap');
+  const email=document.getElementById('loginEmail'), pwd=document.getElementById('loginPwd');
+  const btn=document.getElementById('loginBtn'), err=document.getElementById('loginErr');
+
+  function liberar(){ gate.style.display='none'; app.style.display='block'; }
+  function bloquear(){ gate.style.display='flex'; app.style.display='none'; }
+
+  // Se ja existe sessao ativa (token salvo pelo Supabase), libera direto.
+  if(sb){
+    sb.auth.getSession().then(({data})=>{ if(data && data.session){ liberar(); } });
+  }
+
+  async function entrar(){
+    err.textContent='';
+    if(!sb){ err.textContent='Erro de conexão com o servidor.'; return; }
+    const e=(email.value||'').trim(), p=pwd.value||'';
+    if(!e||!p){ err.textContent='Preencha e-mail e senha.'; return; }
+    btn.disabled=true; btn.textContent='Entrando...';
+    const { data, error } = await sb.auth.signInWithPassword({ email:e, password:p });
+    btn.disabled=false; btn.textContent='Entrar';
+    if(error){ err.textContent='E-mail ou senha inválidos.'; pwd.value=''; pwd.focus(); return; }
+    liberar();
+  }
+  btn.addEventListener('click',entrar);
+  pwd.addEventListener('keydown',ev=>{ if(ev.key==='Enter') entrar(); });
+  email.addEventListener('keydown',ev=>{ if(ev.key==='Enter') pwd.focus(); });
+  email.focus();
+
+  // expõe logout para uso opcional
+  window.__logout = async function(){ if(sb){ await sb.auth.signOut(); } bloquear(); };
+})();
+// ===========================================================================
+
+// ===================== CORES POR CFOP (compartilhado) =====================
+const CFOP_COLORS = {
+  '5101':'DCE6F1','5401':'D8E4BC','5102':'FDE9D9','5403':'E5DFEC','5405':'FFF2CC',
+  '6101':'FCE4D6','6102':'E2EFDA','6108':'EAD1DC','6403':'D9E1F2'
+};
+const PALETTE = ['FCE4D6','E2EFDA','DDEBF7','FFF2CC','EAD1DC','D9E1F2','FBE5D6','C9DAF8','F4CCCC','D0E0E3'];
+const dynColorMap = {}; let dynIdx = 0;
+function cfopColor(cfop){
+  if(CFOP_COLORS[cfop]) return CFOP_COLORS[cfop];
+  if(!dynColorMap[cfop]){ dynColorMap[cfop] = PALETTE[dynIdx % PALETTE.length]; dynIdx++; }
+  return dynColorMap[cfop];
+}
+function brl(n){ return (n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtQtd(n){ n=parseFloat(n)||0; return (Math.round(n*10000)/10000).toLocaleString('pt-BR',{maximumFractionDigits:4}); }
+function fmt4(n){ n=parseFloat(n)||0; return n.toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4}); }
+function statusBadgeClass(status){
+  if(status.startsWith('Cancelada')) return 'cancel';
+  if(status.startsWith('Autorizada')) return 'ok';
+  return 'warn';
+}
+function fmtEnvio(iso){ if(!iso)return ''; const d=new Date(iso); if(isNaN(d))return iso; const p=n=>String(n).padStart(2,'0'); return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes()); }
+function isCancelada(nota){ return (nota.status||'').startsWith('Cancelada'); }
+
+// ===================== EXTRACAO XML (helpers) =====================
+function txt(node, tag){ const el = node.getElementsByTagName(tag)[0]; return el ? el.textContent.trim() : ''; }
+function parseDoc(xmlString){
+  const doc = new DOMParser().parseFromString(xmlString, 'application/xml');
+  if(doc.getElementsByTagName('parsererror').length) throw new Error('XML invalido');
+  return doc;
+}
+function num(s){ return s===''||s==null ? 0 : parseFloat(s); }
+
+// ===================== STATUS DA NF (cStat / evento de cancelamento) =====================
+// Le o cStat do protNFe. Mapeia para um rotulo legivel.
+function statusFromCStat(cStat){
+  const map = {
+    '100':'Autorizada', '150':'Autorizada (fora de prazo)',
+    '101':'Cancelada', '151':'Cancelada (fora de prazo)', '135':'Cancelada',
+    '110':'Denegada', '301':'Denegada', '302':'Denegada'
+  };
+  return map[cStat] || (cStat ? ('cStat '+cStat) : 'Sem protocolo');
+}
+// Detecta se o XML e um EVENTO de cancelamento (proc/retEvento, tpEvento 110111).
+// Retorna a chave da NF cancelada, ou null se nao for evento de cancelamento.
+function cancelChaveFromEvento(doc){
+  const tp = doc.getElementsByTagName('tpEvento')[0];
+  if(!tp || tp.textContent.trim() !== '110111') return null;
+  // cStat do retEvento deve indicar registro homologado (135 ou 136)
+  const ch = doc.getElementsByTagName('chNFe')[0];
+  return ch ? ch.textContent.trim() : null;
+}
+// Le status de uma NF normal a partir do protNFe.
+function readStatus(doc){
+  const prot = doc.getElementsByTagName('protNFe')[0];
+  let cStat='', chave='';
+  if(prot){
+    const cs = prot.getElementsByTagName('cStat')[0]; if(cs) cStat = cs.textContent.trim();
+    const ch = prot.getElementsByTagName('chNFe')[0]; if(ch) chave = ch.textContent.trim();
+  }
+  if(!chave){ const inf = doc.getElementsByTagName('infNFe')[0]; if(inf){ const id=inf.getAttribute('Id')||''; chave = id.replace(/^NFe/,''); } }
+  return { cStat, chave, status: statusFromCStat(cStat) };
+}
+// ========================================================================================
+
+// ===================== CONEXAO SUPABASE =====================
+// (cliente sb já criado no topo, junto ao controle de acesso)
+
+// Insere registros ignorando duplicados (item_uid unico). Retorna {gravados, duplicados, erro}.
+async function salvarRegistros(tabela, registros){
+  if(!sb) return {gravados:0,duplicados:0,erro:'Supabase nao conectado'};
+  if(registros.length===0) return {gravados:0,duplicados:0,erro:null};
+  // upsert com ignoreDuplicates: nao regrava o que ja existe pelo item_uid
+  const { data, error } = await sb.from(tabela)
+    .upsert(registros, { onConflict:'item_uid', ignoreDuplicates:true })
+    .select('item_uid');
+  if(error) return {gravados:0,duplicados:0,erro:error.message};
+  const gravados = data ? data.length : 0;
+  return { gravados, duplicados: registros.length - gravados, erro:null };
+}
+
+// Consulta com filtros opcionais. campoTexto = 'emitente' (entradas) ou 'razao_social' (saidas).
+async function consultarRegistros(tabela, {nf, texto, campoTexto, mes, envioDe, envioAte}){
+  if(!sb) return {dados:[],erro:'Supabase nao conectado'};
+  // Monta a query base com os filtros (reutilizada a cada pagina)
+  function montaQuery(){
+    let q = sb.from(tabela).select('*').order('nf_numero',{ascending:true}).order('id',{ascending:true});
+    if(nf)   q = q.ilike('nf_numero', '%'+nf+'%');
+    if(texto)q = q.ilike(campoTexto, '%'+texto+'%');
+    if(mes)  q = q.eq('mes_ref', mes);
+    if(envioDe)  q = q.gte('created_at', envioDe+'T00:00:00');
+    if(envioAte) q = q.lte('created_at', envioAte+'T23:59:59');
+    return q;
+  }
+  // Pagina de 1000 em 1000 (limite do Supabase) ate trazer todos os registros
+  const PAGE=1000; let from=0; let todos=[];
+  for(let i=0;i<50;i++){ // teto de 50 paginas (50 mil registros) por seguranca
+    const { data, error } = await montaQuery().range(from, from+PAGE-1);
+    if(error) return {dados:[],erro:error.message};
+    if(!data || data.length===0) break;
+    todos = todos.concat(data);
+    if(data.length < PAGE) break; // ultima pagina
+    from += PAGE;
+  }
+  return { dados:todos, erro:null };
+}
+
+// Apaga todos os itens de uma NF (por nf_numero). Retorna {apagados, erro}.
+async function apagarPorNf(tabela, nfNumero){
+  if(!sb) return {apagados:0,erro:'Supabase nao conectado'};
+  const { data, error } = await sb.from(tabela).delete().eq('nf_numero', nfNumero).select('id');
+  if(error) return {apagados:0,erro:error.message};
+  return { apagados:data?data.length:0, erro:null };
+}
+// Apaga um registro especifico por id. Retorna {ok, erro}.
+async function apagarPorId(tabela, id){
+  if(!sb) return {ok:false,erro:'Supabase nao conectado'};
+  const { error } = await sb.from(tabela).delete().eq('id', id);
+  if(error) return {ok:false,erro:error.message};
+  return { ok:true, erro:null };
+}
+// Apaga varios registros de uma vez por lista de ids. Retorna {apagados, erro}.
+async function apagarPorIds(tabela, ids){
+  if(!sb) return {apagados:0,erro:'Supabase nao conectado'};
+  if(!ids.length) return {apagados:0,erro:null};
+  const { data, error } = await sb.from(tabela).delete().in('id', ids).select('id');
+  if(error) return {apagados:0,erro:error.message};
+  return { apagados:data?data.length:0, erro:null };
+}
+// ============================================================
+
+// Navegacao entre telas
+document.querySelectorAll('.nav button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    const s=b.dataset.screen;
+    document.getElementById('screen-ent').classList.toggle('active', s==='ent');
+    document.getElementById('screen-sai').classList.toggle('active', s==='sai');
+    document.getElementById('screen-dash').classList.toggle('active', s==='dash');
+    document.getElementById('screen-dashc').classList.toggle('active', s==='dashc');
+    if(s==='dash' && window.__initDash) window.__initDash();
+    if(s==='dashc' && window.__initDashC) window.__initDashC();
+  });
+});
+
+// Botão Sair (logout do Supabase Auth)
+(function(){
+  const bs=document.getElementById('btnSair');
+  if(bs) bs.addEventListener('click', ()=>{ if(window.__logout) window.__logout(); });
+})();
+
+// Alternancia das visoes Importados/Banco (por modulo). Callbacks opcionais ao abrir cada visao.
+const viewCallbacks = { ent:{}, sai:{} };
+function setupViewTabs(mod){
+  const tabImp=document.getElementById('vtab-imp-'+mod), tabDb=document.getElementById('vtab-db-'+mod);
+  const paneImp=document.getElementById('vpane-imp-'+mod), paneDb=document.getElementById('vpane-db-'+mod);
+  function activate(view){
+    tabImp.classList.toggle('active', view==='imp');
+    tabDb.classList.toggle('active', view==='db');
+    paneImp.classList.toggle('active', view==='imp');
+    paneDb.classList.toggle('active', view==='db');
+    const cb=viewCallbacks[mod][view]; if(cb) cb();
+  }
+  tabImp.addEventListener('click',()=>activate('imp'));
+  tabDb.addEventListener('click',()=>activate('db'));
+  return { activate };
+}
+const viewTabsEnt = setupViewTabs('ent');
+const viewTabsSai = setupViewTabs('sai');
+
+// ========================================================================
+//  MODULO ENTRADAS
+// ========================================================================
+(function(){
+  const drop=document.getElementById('drop-ent'), input=document.getElementById('input-ent');
+  const filesEl=document.getElementById('files-ent'), totalsEl=document.getElementById('totals-ent');
+  const tbody=document.getElementById('tbody-ent'), countEl=document.getElementById('count-ent');
+  const btnExport=document.getElementById('export-ent'), btnExportList=document.getElementById('exportList-ent'), btnClear=document.getElementById('clear-ent');
+  const btnSaveDb=document.getElementById('saveDb-ent'), mesRefInp=document.getElementById('mesRef-ent'), dbmsg=document.getElementById('dbmsg-ent');
+  const qNf=document.getElementById('qNf-ent'), qTexto=document.getElementById('qTexto-ent'), qMes=document.getElementById('qMes-ent');
+  const qEnvioDe=document.getElementById('qEnvioDe-ent'), qEnvioAte=document.getElementById('qEnvioAte-ent');
+  const qbody=document.getElementById('qbody-ent'), qmsg=document.getElementById('qmsg-ent');
+  const qtotals=document.getElementById('qtotals-ent');
+  const btnSearch=document.getElementById('search-ent'), btnSearchClear=document.getElementById('searchClear-ent'), btnSearchXlsx=document.getElementById('searchXlsx-ent');
+  const delNfInp=document.getElementById('delNf-ent'), btnDelNf=document.getElementById('delNfBtn-ent');
+  const btnDelSel=document.getElementById('delSelBtn-ent'), selCount=document.getElementById('selCount-ent'), selAll=document.getElementById('selAll-ent');
+  let notas=[], fileList=[], cancelados=new Set(), resultadosBusca=[];
+
+  drop.addEventListener('click',()=>input.click());
+  input.addEventListener('change',e=>handleFiles(e.target.files));
+  ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('hover')}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('hover')}));
+  drop.addEventListener('drop',e=>handleFiles(e.dataTransfer.files));
+  btnClear.addEventListener('click',()=>{notas=[];fileList=[];cancelados=new Set();render();});
+  btnExport.addEventListener('click',exportBlocos);
+  btnExportList.addEventListener('click',exportLista);
+  btnSaveDb.addEventListener('click',salvarNoBanco);
+  btnSearch.addEventListener('click',buscar);
+  btnSearchClear.addEventListener('click',()=>{qNf.value='';qTexto.value='';qMes.value='';qEnvioDe.value='';qEnvioAte.value='';qbody.innerHTML='<tr><td colspan="20" class="empty">Faça uma busca para ver os registros salvos.</td></tr>';qmsg.textContent='';qtotals.innerHTML='';resultadosBusca=[];btnSearchXlsx.disabled=true;if(selAll)selAll.checked=false;atualizaSelecao();});
+  btnSearchXlsx.addEventListener('click',exportBusca);
+  btnDelNf.addEventListener('click',apagarNfInteira);
+  selAll.addEventListener('change',()=>{ qbody.querySelectorAll('.rowchk').forEach(c=>c.checked=selAll.checked); atualizaSelecao(); });
+  btnDelSel.addEventListener('click',apagarSelecionados);
+
+  function idsSelecionados(){ return [...qbody.querySelectorAll('.rowchk:checked')].map(c=>parseInt(c.value)); }
+  function atualizaSelecao(){
+    const n=idsSelecionados().length;
+    selCount.textContent=n;
+    btnDelSel.disabled = n===0;
+  }
+  window.__selEnt = atualizaSelecao;
+  // Ao abrir a visão "Banco", busca automaticamente. Ao importar XMLs, volta para "Importados".
+  viewCallbacks.ent.db = ()=>{ buscar(); };
+  async function apagarSelecionados(){
+    const ids=idsSelecionados();
+    if(!ids.length) return;
+    if(!confirm('Apagar '+ids.length+' registro(s) selecionado(s) das entradas? Esta ação é irreversível.')) return;
+    qmsg.className='dbmsg'; qmsg.textContent='Apagando '+ids.length+' registro(s)...';
+    const r=await apagarPorIds('nf_entradas', ids);
+    if(r.erro){ qmsg.className='dbmsg err'; qmsg.textContent='Erro: '+r.erro; return; }
+    qmsg.className='dbmsg ok'; qmsg.textContent='✓ '+r.apagados+' registro(s) apagado(s).';
+    if(selAll) selAll.checked=false;
+    buscar();
+  }
+
+  async function apagarNfInteira(){
+    const nf=delNfInp.value.trim();
+    if(!nf){ qmsg.className='dbmsg err'; qmsg.textContent='Informe o Nº da NF a apagar.'; return; }
+    if(!confirm('Apagar TODOS os itens da NF '+nf+' (entradas) do banco? Esta ação é irreversível.')) return;
+    qmsg.className='dbmsg'; qmsg.textContent='Apagando...';
+    const r=await apagarPorNf('nf_entradas', nf);
+    if(r.erro){ qmsg.className='dbmsg err'; qmsg.textContent='Erro: '+r.erro; return; }
+    qmsg.className='dbmsg ok'; qmsg.textContent='✓ '+r.apagados+' item(ns) da NF '+nf+' apagado(s).';
+    delNfInp.value=''; if(resultadosBusca.length) buscar();
+  }
+  async function apagarLinha(id){
+    if(!confirm('Apagar este registro do banco? Esta ação é irreversível.')) return;
+    const r=await apagarPorId('nf_entradas', id);
+    if(r.erro){ qmsg.className='dbmsg err'; qmsg.textContent='Erro: '+r.erro; return; }
+    qmsg.className='dbmsg ok'; qmsg.textContent='✓ Registro apagado.';
+    buscar();
+  }
+  window.__delEnt = apagarLinha;
+
+  // monta os registros (item a item) para gravar
+  function montarRegistros(){
+    const mes=mesRefInp.value; // 'AAAA-MM'
+    const regs=[];
+    notas.forEach(n=>n.items.forEach(it=>{
+      regs.push({
+        item_uid: n.chave+'-'+(it.nItem||''),
+        nf_numero:n.nf, chave_acesso:n.chave, emitente:n.emit,
+        referencia:it.ref, descricao:it.desc, ncm:it.ncm, cfop:it.cfop,
+        quantidade:it.qtd, vlr_total:it.total, vlr_icms:it.icms, vlr_icms_subst:it.icmsSubst, credito_individual:it.credInd, vlr_icms_st_ret:it.icmsSTRet, credito_st_individual:it.credSTInd, status:n.status, nat_op:n.natOp||null, uf:n.uf||null, data_emissao:n.data||null, mes_ref:mes
+      });
+    }));
+    return regs;
+  }
+  async function salvarNoBanco(){
+    if(!mesRefInp.value){ dbmsg.className='dbmsg err'; dbmsg.textContent='Selecione o mês de competência antes de salvar.'; return; }
+    dbmsg.className='dbmsg'; dbmsg.textContent='Salvando...';
+    const regs=montarRegistros();
+    const r=await salvarRegistros('nf_entradas', regs);
+    if(r.erro){ dbmsg.className='dbmsg err'; dbmsg.textContent='Erro: '+r.erro; return; }
+    dbmsg.className='dbmsg ok';
+    dbmsg.textContent='✓ '+r.gravados+' itens gravados · '+r.duplicados+' já existiam (ignorados). Importação limpa.';
+    notas=[];fileList=[];cancelados=new Set();render();
+  }
+  async function buscar(){
+    qmsg.className='dbmsg'; qmsg.textContent='Buscando...';
+    const r=await consultarRegistros('nf_entradas',{nf:qNf.value.trim(),texto:qTexto.value.trim(),campoTexto:'emitente',mes:qMes.value,envioDe:qEnvioDe.value,envioAte:qEnvioAte.value});
+    if(r.erro){ qmsg.className='dbmsg err'; qmsg.textContent='Erro: '+r.erro; return; }
+    resultadosBusca=r.dados;
+    if(r.dados.length===0){ qbody.innerHTML='<tr><td colspan="20" class="empty">Nenhum registro encontrado.</td></tr>'; qmsg.textContent=''; qtotals.innerHTML=''; btnSearchXlsx.disabled=true; if(selAll)selAll.checked=false; atualizaSelecao(); return; }
+    qbody.innerHTML=r.dados.map(d=>{const col=cfopColor(d.cfop);return '<tr><td><input type="checkbox" class="rowchk" value="'+d.id+'" onchange="window.__selEnt()"></td><td>'+(d.mes_ref||'')+'</td><td>'+fmtEnvio(d.created_at)+'</td><td>'+(d.nf_numero||'')+'</td><td>'+(d.emitente||'')+'</td><td class="desc" title="'+(d.nat_op||'')+'">'+(d.nat_op||'')+'</td><td>'+(d.uf||'')+'</td><td>'+(d.referencia||'')+'</td><td class="desc" title="'+(d.descricao||'')+'">'+(d.descricao||'')+'</td><td>'+(d.ncm||'')+'</td><td class="cfopcell" style="color:#'+col+'">'+(d.cfop||'')+'</td><td class="num">'+fmtQtd(d.quantidade)+'</td><td class="num">'+brl(d.vlr_total)+'</td><td class="num">'+brl(d.vlr_icms)+'</td><td class="num">'+brl(d.vlr_icms_subst)+'</td><td class="num">'+fmt4(d.credito_individual)+'</td><td class="num">'+brl(d.vlr_icms_st_ret)+'</td><td class="num">'+fmt4(d.credito_st_individual)+'</td><td><span class="badge '+statusBadgeClass(d.status||'')+'">'+(d.status||'')+'</span></td><td><button class="delrow" title="Apagar este registro" onclick="window.__delEnt('+d.id+')">🗑</button></td></tr>';}).join('');
+    if(selAll)selAll.checked=false; atualizaSelecao();
+    const totIcms=r.dados.reduce((s,d)=>s+(parseFloat(d.vlr_icms)||0),0);
+    qmsg.className='dbmsg ok'; qmsg.textContent=r.dados.length+' registros · ICMS total R$ '+brl(totIcms);
+    renderQTotals(r.dados);
+    btnSearchXlsx.disabled=false;
+  }
+  function renderQTotals(dados){
+    const nfs=new Set(), nfsCancel=new Set(); let totVal=0, totIcms=0; const byCfop={};
+    dados.forEach(d=>{
+      const cancel=(d.status||'').startsWith('Cancelada');
+      nfs.add(d.nf_numero);
+      if(cancel) nfsCancel.add(d.nf_numero);
+      if(!cancel){ totVal+=parseFloat(d.vlr_total)||0; totIcms+=parseFloat(d.vlr_icms)||0;
+        const cf=d.cfop||'—'; byCfop[cf]=(byCfop[cf]||0)+(parseFloat(d.vlr_icms)||0); }
+    });
+    const cfops=Object.keys(byCfop).sort();
+    const rows=cfops.map(cf=>'<div class="cfop-row"><span class="cfop-tag"><span class="dot" style="background:#'+cfopColor(cf)+'"></span>CFOP '+cf+'</span><span class="cfop-val">R$ '+brl(byCfop[cf])+'</span></div>').join('');
+    qtotals.innerHTML='<div class="tcard"><div class="lbl">NFs no filtro</div><div class="val">'+nfs.size+'</div></div>'
+      +'<div class="tcard danger"><div class="lbl">NFs canceladas</div><div class="val">'+nfsCancel.size+'</div></div>'
+      +'<div class="tcard"><div class="lbl">Total de Valor (real)</div><div class="val">R$ '+brl(totVal)+'</div></div>'
+      +'<div class="tcard"><div class="lbl">Total de ICMS (real)</div><div class="val">R$ '+brl(totIcms)+'</div></div>'
+      +'<div class="tcard cfop"><div class="lbl" style="margin-bottom:6px">ICMS por CFOP</div>'+rows+'</div>';
+  }
+  async function exportBusca(){
+    const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('Entradas');
+    const thin={style:'thin',color:{argb:'FF999999'}},border={top:thin,left:thin,bottom:thin,right:thin};
+    ['Mês','Envio','N° NF','Emitente','Natureza Op.','UF','Referência','Descrição','NCM','CFOP','Qtd','Vlr Total','Vlr ICMS','ICMS Subst.','Créd. Individual','ICMS ST Ret.','Créd. ST Individual','Status'].forEach((h,j)=>{const c=ws.getCell(1,j+1);c.value=h;c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF2F2F2'}};c.border=border;c.font={name:'Calibri',size:12,bold:true};});
+    let r=2;
+    resultadosBusca.forEach(d=>{const col=cfopColor(d.cfop);const vals=[d.mes_ref,fmtEnvio(d.created_at),d.nf_numero,d.emitente,d.nat_op,d.uf,d.referencia,d.descricao,d.ncm,d.cfop,parseFloat(d.quantidade)||0,parseFloat(d.vlr_total)||0,parseFloat(d.vlr_icms)||0,parseFloat(d.vlr_icms_subst)||0,parseFloat(d.credito_individual)||0,parseFloat(d.vlr_icms_st_ret)||0,parseFloat(d.credito_st_individual)||0,d.status];vals.forEach((v,j)=>{const c=ws.getCell(r,j+1);c.value=v;c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+col}};c.border=border;c.font={name:'Calibri',size:12};if(j===10)c.numFmt='#,##0.####';if(j===11||j===12||j===13||j===15)c.numFmt='#,##0.00';if(j===14||j===16)c.numFmt='#,##0.0000';});r++;});
+    [10,16,12,38,28,6,16,42,12,8,10,12,12,14,16,14,18,14].forEach((w,i)=>ws.getColumn(i+1).width=w);
+    ws.views=[{state:'frozen',ySplit:1}]; ws.autoFilter={from:{row:1,column:1},to:{row:1,column:18}};
+    downloadBuf(await wb.xlsx.writeBuffer(),'CONSULTA_ENTRADAS_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  }
+
+  function aplicaCancelamentos(){
+    notas.forEach(n=>{ if(cancelados.has(n.chave)) n.status='Cancelada'; });
+  }
+
+  async function handleFiles(list){
+    const xmls=[...list].filter(f=>f.name.toLowerCase().endsWith('.xml'));
+    if(xmls.length) viewTabsEnt.activate('imp');
+    for(const f of xmls){
+      const entry={name:f.name,status:'processando...'}; fileList.push(entry); render();
+      try{
+        const doc=parseDoc(await f.text());
+        const chaveCancel=cancelChaveFromEvento(doc);
+        if(chaveCancel){
+          cancelados.add(chaveCancel); aplicaCancelamentos();
+          entry.status='ok'; entry.evento=true;
+        } else {
+          const nota=parse(doc);
+          if(nota.items.length===0){entry.status='erro';entry.err='nenhum item encontrado';}
+          else if(nota.chave && notas.some(n=>n.chave===nota.chave)){entry.status='dup';entry.err='NF já importada nesta sessão';}
+          else {entry.status='ok';entry.count=nota.items.length;
+            if(cancelados.has(nota.chave)) nota.status='Cancelada';
+            notas.push(nota);}
+        }
+      }catch(err){entry.status='erro';entry.err=err.message;}
+      render();
+    }
+  }
+  function parse(doc){
+    const nNF=txt(doc,'nNF');
+    const natOp=txt(doc,'natOp');
+    let emit=''; let ufEmit=''; const e=doc.getElementsByTagName('emit')[0];
+    if(e){ emit=txt(e,'xNome'); const ende=e.getElementsByTagName('enderEmit')[0]; if(ende) ufEmit=txt(ende,'UF'); }
+    // data de emissao: dhEmi (NFe 3.10+, ISO) ou dEmi (antiga). Guarda como AAAA-MM-DD.
+    let dEmi=txt(doc,'dhEmi')||txt(doc,'dEmi'); if(dEmi) dEmi=dEmi.slice(0,10);
+    const st=readStatus(doc);
+    const dets=doc.getElementsByTagName('det'); const items=[];
+    for(const det of dets){
+      const prod=det.getElementsByTagName('prod')[0]; if(!prod)continue;
+      const imp=det.getElementsByTagName('imposto')[0]; let vICMS='', vSubst='', vSTRet='';
+      if(imp){
+        const v=imp.getElementsByTagName('vICMS')[0]; if(v)vICMS=v.textContent.trim();
+        const vs=imp.getElementsByTagName('vICMSSubstituto')[0]; if(vs)vSubst=vs.textContent.trim();
+        const vr=imp.getElementsByTagName('vICMSSTRet')[0]; if(vr)vSTRet=vr.textContent.trim();
+      }
+      const qtd=num(txt(prod,'qCom'));
+      const icmsSubst=num(vSubst);
+      const icmsSTRet=num(vSTRet);
+      const credInd=(qtd>0)?(icmsSubst/qtd):0;
+      const credSTInd=(qtd>0)?(icmsSTRet/qtd):0;
+      items.push({nItem:det.getAttribute('nItem')||'',ref:txt(prod,'cProd'),desc:txt(prod,'xProd'),ncm:txt(prod,'NCM'),cfop:txt(prod,'CFOP'),qtd:qtd,total:num(txt(prod,'vProd')),icms:num(vICMS),icmsSubst:icmsSubst,credInd:credInd,icmsSTRet:icmsSTRet,credSTInd:credSTInd});
+    }
+    return {nf:nNF,emit,uf:ufEmit,natOp,data:dEmi,items,chave:st.chave,status:st.status};
+  }
+
+  const incCancelChk=document.getElementById('incCancel-ent');
+  const filterToggle=document.getElementById('filtertoggle-ent');
+  incCancelChk.addEventListener('change',renderTotals);
+
+  function computeTotals(){
+    const incluirCancel=incCancelChk.checked;
+    const qtdCancel=notas.filter(isCancelada).length;
+    const base=incluirCancel?notas:notas.filter(n=>!isCancelada(n));
+    const flat=base.flatMap(n=>n.items);
+    const totalValor=flat.reduce((s,i)=>s+(i.total||0),0);
+    const totalICMS=flat.reduce((s,i)=>s+(i.icms||0),0);
+    const byCfop={}; flat.forEach(i=>byCfop[i.cfop]=(byCfop[i.cfop]||0)+(i.icms||0));
+    return {qtdNotas:notas.length,qtdCancel,totalValor,totalICMS,byCfop,incluirCancel};
+  }
+  function renderTotals(){
+    if(notas.length===0){totalsEl.innerHTML='';filterToggle.style.display='none';return;}
+    const t=computeTotals(); const cfops=Object.keys(t.byCfop).sort();
+    filterToggle.style.display=t.qtdCancel>0?'flex':'none';
+    const rows=cfops.map(cf=>'<div class="cfop-row"><span class="cfop-tag"><span class="dot" style="background:#'+cfopColor(cf)+'"></span>CFOP '+cf+'</span><span class="cfop-val">R$ '+brl(t.byCfop[cf])+'</span></div>').join('');
+    const lblICMS=t.incluirCancel?'Total de ICMS (com canceladas)':'Total de ICMS (real)';
+    const sfxV=t.incluirCancel?' (com canceladas)':' (real)';
+    totalsEl.innerHTML='<div class="tcard"><div class="lbl">Notas importadas</div><div class="val">'+t.qtdNotas+'</div></div>'
+      +'<div class="tcard danger"><div class="lbl">NFs canceladas</div><div class="val">'+t.qtdCancel+'</div></div>'
+      +'<div class="tcard"><div class="lbl">Total de Valor'+sfxV+'</div><div class="val">R$ '+brl(t.totalValor)+'</div></div>'
+      +'<div class="tcard"><div class="lbl">'+lblICMS+'</div><div class="val">R$ '+brl(t.totalICMS)+'</div></div>'
+      +'<div class="tcard cfop"><div class="lbl" style="margin-bottom:6px">ICMS por CFOP</div>'+rows+'</div>';
+  }
+  function render(){
+    filesEl.innerHTML=fileList.map(f=>{let st=f.status,cls='';if(f.status==='ok'){st=f.evento?'✓ evento cancelamento':('✓ '+f.count+' itens');cls='ok';}if(f.status==='dup'){st='⚠ '+(f.err||'duplicada');cls='';}if(f.status==='erro'){st='✗ '+(f.err||'erro');cls='err';}return '<div class="file"><span class="nm">'+f.name+'</span><span class="st '+cls+'" style="'+(f.status==='dup'?'color:#facc15':'')+'">'+st+'</span></div>';}).join('');
+    const flat=notas.flatMap(n=>n.items.map(i=>({nf:n.nf,emit:n.emit,natOp:n.natOp,uf:n.uf,status:n.status,...i})));
+    if(flat.length===0)tbody.innerHTML='<tr><td colspan="16" class="empty">Nenhum item extraído ainda.</td></tr>';
+    else tbody.innerHTML=flat.map(r=>{const col=cfopColor(r.cfop);return '<tr><td>'+r.nf+'</td><td>'+r.emit+'</td><td class="desc" title="'+(r.natOp||'')+'">'+(r.natOp||'')+'</td><td>'+(r.uf||'')+'</td><td>'+r.ref+'</td><td class="desc" title="'+r.desc+'">'+r.desc+'</td><td>'+r.ncm+'</td><td class="cfopcell" style="color:#'+col+'">'+r.cfop+'</td><td class="num">'+fmtQtd(r.qtd)+'</td><td class="num">'+brl(r.total)+'</td><td class="num">'+brl(r.icms)+'</td><td class="num">'+brl(r.icmsSubst)+'</td><td class="num">'+fmt4(r.credInd)+'</td><td class="num">'+brl(r.icmsSTRet)+'</td><td class="num">'+fmt4(r.credSTInd)+'</td><td><span class="badge '+statusBadgeClass(r.status)+'">'+r.status+'</span></td></tr>';}).join('');
+    countEl.textContent=flat.length?(flat.length+' itens · '+notas.length+' nota(s)'):'';
+    btnExport.disabled=notas.length===0; btnExportList.disabled=notas.length===0; btnClear.disabled=fileList.length===0;
+    btnSaveDb.disabled=notas.length===0;
+    renderTotals();
+  }
+
+  async function exportBlocos(){
+    const wb=new ExcelJS.Workbook(), ws=wb.addWorksheet('NF-e');
+    const STEP=11,HEADER_ROW=6,FIRST_ITEM=7;
+    const thin={style:'thin',color:{argb:'FF999999'}}, border={top:thin,left:thin,bottom:thin,right:thin};
+    const ORANGE='FCE4D6',GREYHEAD='F2F2F2';
+    notas.forEach((nota,bi)=>{
+      const c0=bi*STEP+1;
+      ws.getCell(2,c0).value='EMITENTE'; ws.getCell(2,c0+1).value=nota.emit; ws.mergeCells(2,c0+1,2,c0+9);
+      ws.getCell(3,c0).value='N° NF'; ws.getCell(3,c0+1).value=/^\d+$/.test(nota.nf)?parseInt(nota.nf):nota.nf; ws.mergeCells(3,c0+1,3,c0+7);
+      ws.getCell(3,c0+8).value=(nota.uf||''); ws.getCell(3,c0+9).value=nota.status;
+      ws.getCell(4,c0).value='NAT. OP.'; ws.getCell(4,c0+1).value=(nota.natOp||''); ws.mergeCells(4,c0+1,4,c0+9);
+      for(let r=2;r<=4;r++)for(let c=c0;c<=c0+9;c++){const cell=ws.getCell(r,c);cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+ORANGE}};cell.border=border;cell.font={name:'Calibri',size:12,bold:(c>c0)};cell.alignment={horizontal:(c===c0)?'center':'left',vertical:'middle'};}
+      if(nota.status&&nota.status.startsWith('Cancelada')){ws.getCell(3,c0+9).font={name:'Calibri',size:12,bold:true,color:{argb:'FFC00000'}};}
+      ['Referência','Descrição','NCM','CFOP','Vlr Total','Vlr ICMS','ICMS Subst.','Créd. Indiv.','ICMS ST Ret.','Créd. ST Ind.'].forEach((h,j)=>{const cell=ws.getCell(HEADER_ROW,c0+j);cell.value=h;cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+GREYHEAD}};cell.border=border;cell.font={name:'Calibri',size:12,bold:true};cell.alignment={horizontal:(j>=2)?'center':'left',vertical:'middle'};});
+      nota.items.forEach((it,k)=>{const r=FIRST_ITEM+k,color=cfopColor(it.cfop),vals=[it.ref,it.desc,it.ncm,it.cfop,it.total,it.icms,it.icmsSubst,it.credInd,it.icmsSTRet,it.credSTInd];vals.forEach((v,j)=>{const cell=ws.getCell(r,c0+j);cell.value=v;cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+color}};cell.border=border;cell.font={name:'Calibri',size:12};if(j===4||j===5||j===6||j===8){cell.numFmt='#,##0.00';cell.alignment={horizontal:'center'};}else if(j===7||j===9){cell.numFmt='#,##0.0000';cell.alignment={horizontal:'center'};}else if(j===2||j===3){cell.alignment={horizontal:'center'};}else cell.alignment={horizontal:'left'};});});
+      ws.getColumn(c0).width=16.9;ws.getColumn(c0+1).width=40.9;ws.getColumn(c0+2).width=12.9;ws.getColumn(c0+3).width=8.9;ws.getColumn(c0+4).width=12.9;ws.getColumn(c0+5).width=12.9;ws.getColumn(c0+6).width=14.9;ws.getColumn(c0+7).width=14.9;ws.getColumn(c0+8).width=14.9;ws.getColumn(c0+9).width=14.9;
+    });
+    downloadBuf(await wb.xlsx.writeBuffer(),'ENTRADAS_blocos_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  }
+  async function exportLista(){
+    const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('NF-e');
+    const thin={style:'thin',color:{argb:'FF999999'}},border={top:thin,left:thin,bottom:thin,right:thin};
+    ['N° NF','Emitente','Natureza Op.','UF','Referência','Descrição','NCM','CFOP','Qtd','Vlr Total','Vlr ICMS','ICMS Subst.','Créd. Individual','ICMS ST Ret.','Créd. ST Individual','Status'].forEach((h,j)=>{const c=ws.getCell(1,j+1);c.value=h;c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF2F2F2'}};c.border=border;c.font={name:'Calibri',size:12,bold:true};c.alignment={horizontal:(j>=6&&j<=7)?'center':'left',vertical:'middle'};});
+    let r=2;
+    notas.forEach(n=>n.items.forEach(it=>{const col=cfopColor(it.cfop),vals=[/^\d+$/.test(n.nf)?parseInt(n.nf):n.nf,n.emit,n.natOp,n.uf,it.ref,it.desc,it.ncm,it.cfop,it.qtd,it.total,it.icms,it.icmsSubst,it.credInd,it.icmsSTRet,it.credSTInd,n.status];vals.forEach((v,j)=>{const c=ws.getCell(r,j+1);c.value=v;c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+col}};c.border=border;c.font={name:'Calibri',size:12};if(j===8){c.numFmt='#,##0.####';c.alignment={horizontal:'center'};}else if(j===9||j===10||j===11||j===13){c.numFmt='#,##0.00';c.alignment={horizontal:'center'};}else if(j===12||j===14){c.numFmt='#,##0.0000';c.alignment={horizontal:'center'};}else if(j===6||j===7||j===15){c.alignment={horizontal:'center'};}else c.alignment={horizontal:'left'};if(j===15&&n.status&&n.status.startsWith('Cancelada')){c.font={name:'Calibri',size:12,bold:true,color:{argb:'FFC00000'}};}});r++;}));
+    ws.getColumn(1).width=12;ws.getColumn(2).width=38;ws.getColumn(3).width=28;ws.getColumn(4).width=6;ws.getColumn(5).width=16;ws.getColumn(6).width=42;ws.getColumn(7).width=12;ws.getColumn(8).width=8;ws.getColumn(9).width=10;ws.getColumn(10).width=12;ws.getColumn(11).width=12;ws.getColumn(12).width=14;ws.getColumn(13).width=16;ws.getColumn(14).width=14;ws.getColumn(15).width=18;ws.getColumn(16).width=14;
+    ws.views=[{state:'frozen',ySplit:1}]; ws.autoFilter={from:{row:1,column:1},to:{row:1,column:16}};
+    downloadBuf(await wb.xlsx.writeBuffer(),'ENTRADAS_lista_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  }
+})();
+
+// ========================================================================
+//  MODULO SAIDAS
+// ========================================================================
+(function(){
+  const drop=document.getElementById('drop-sai'), input=document.getElementById('input-sai');
+  const filesEl=document.getElementById('files-sai'), totalsEl=document.getElementById('totals-sai');
+  const tbody=document.getElementById('tbody-sai'), countEl=document.getElementById('count-sai');
+  const btnExport=document.getElementById('export-sai'), btnExportList=document.getElementById('exportList-sai'), btnClear=document.getElementById('clear-sai');
+  const btnSaveDb=document.getElementById('saveDb-sai'), dbmsg=document.getElementById('dbmsg-sai');
+  const qNf=document.getElementById('qNf-sai'), qTexto=document.getElementById('qTexto-sai'), qMes=document.getElementById('qMes-sai');
+  const qEnvioDe=document.getElementById('qEnvioDe-sai'), qEnvioAte=document.getElementById('qEnvioAte-sai');
+  const qbody=document.getElementById('qbody-sai'), qmsg=document.getElementById('qmsg-sai');
+  const qtotals=document.getElementById('qtotals-sai');
+  const btnSearch=document.getElementById('search-sai'), btnSearchClear=document.getElementById('searchClear-sai'), btnSearchXlsx=document.getElementById('searchXlsx-sai');
+  const delNfInp=document.getElementById('delNf-sai'), btnDelNf=document.getElementById('delNfBtn-sai');
+  const btnDelSel=document.getElementById('delSelBtn-sai'), selCount=document.getElementById('selCount-sai'), selAll=document.getElementById('selAll-sai');
+  let notas=[], fileList=[], cancelados=new Set(), resultadosBusca=[];
+
+  drop.addEventListener('click',()=>input.click());
+  input.addEventListener('change',e=>handleFiles(e.target.files));
+  ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('hover')}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('hover')}));
+  drop.addEventListener('drop',e=>handleFiles(e.dataTransfer.files));
+  btnClear.addEventListener('click',()=>{notas=[];fileList=[];cancelados=new Set();render();});
+  btnExport.addEventListener('click',exportBlocos);
+  btnExportList.addEventListener('click',exportLista);
+  btnSaveDb.addEventListener('click',salvarNoBanco);
+  btnSearch.addEventListener('click',buscar);
+  btnSearchClear.addEventListener('click',()=>{qNf.value='';qTexto.value='';qMes.value='';qbody.innerHTML='<tr><td colspan="19" class="empty">Faça uma busca para ver os registros salvos.</td></tr>';qmsg.textContent='';qtotals.innerHTML='';resultadosBusca=[];btnSearchXlsx.disabled=true;if(selAll)selAll.checked=false;atualizaSelecao();});
+  btnSearchXlsx.addEventListener('click',exportBusca);
+  btnDelNf.addEventListener('click',apagarNfInteira);
+  selAll.addEventListener('change',()=>{ qbody.querySelectorAll('.rowchk').forEach(c=>c.checked=selAll.checked); atualizaSelecao(); });
+  btnDelSel.addEventListener('click',apagarSelecionados);
+
+  function idsSelecionados(){ return [...qbody.querySelectorAll('.rowchk:checked')].map(c=>parseInt(c.value)); }
+  function atualizaSelecao(){
+    const n=idsSelecionados().length;
+    selCount.textContent=n;
+    btnDelSel.disabled = n===0;
+  }
+  window.__selSai = atualizaSelecao;
+  viewCallbacks.sai.db = ()=>{ buscar(); };
+  async function apagarSelecionados(){
+    const ids=idsSelecionados();
+    if(!ids.length) return;
+    if(!confirm('Apagar '+ids.length+' registro(s) selecionado(s) das saídas? Esta ação é irreversível.')) return;
+    qmsg.className='dbmsg'; qmsg.textContent='Apagando '+ids.length+' registro(s)...';
+    const r=await apagarPorIds('nf_saidas', ids);
+    if(r.erro){ qmsg.className='dbmsg err'; qmsg.textContent='Erro: '+r.erro; return; }
+    qmsg.className='dbmsg ok'; qmsg.textContent='✓ '+r.apagados+' registro(s) apagado(s).';
+    if(selAll) selAll.checked=false;
+    buscar();
+  }
+
+  async function apagarNfInteira(){
+    const nf=delNfInp.value.trim();
+    if(!nf){ qmsg.className='dbmsg err'; qmsg.textContent='Informe o Nº da NF a apagar.'; return; }
+    if(!confirm('Apagar TODOS os itens da NF '+nf+' (saídas) do banco? Esta ação é irreversível.')) return;
+    qmsg.className='dbmsg'; qmsg.textContent='Apagando...';
+    const r=await apagarPorNf('nf_saidas', nf);
+    if(r.erro){ qmsg.className='dbmsg err'; qmsg.textContent='Erro: '+r.erro; return; }
+    qmsg.className='dbmsg ok'; qmsg.textContent='✓ '+r.apagados+' item(ns) da NF '+nf+' apagado(s).';
+    delNfInp.value=''; if(resultadosBusca.length) buscar();
+  }
+  async function apagarLinha(id){
+    if(!confirm('Apagar este registro do banco? Esta ação é irreversível.')) return;
+    const r=await apagarPorId('nf_saidas', id);
+    if(r.erro){ qmsg.className='dbmsg err'; qmsg.textContent='Erro: '+r.erro; return; }
+    qmsg.className='dbmsg ok'; qmsg.textContent='✓ Registro apagado.';
+    buscar();
+  }
+  window.__delSai = apagarLinha;
+
+  function montarRegistros(){
+    const regs=[];
+    notas.forEach(n=>{
+      const mes=(n.data||'').slice(0,7); // 'AAAA-MM' da data de emissao
+      n.items.forEach(it=>{
+        regs.push({
+          item_uid: n.chave+'-'+(it.nItem||''),
+          nf_numero:n.nf, chave_acesso:n.chave, razao_social:n.dest, serie:n.serie,
+          ncm:it.ncm, cfop:it.cfop, referencia:it.ref, descricao:it.desc, quantidade:it.qtd, valor:it.valor, bc_icms:it.bc, vlr_icms:it.icms,
+          status:n.status, nat_op:n.natOp||null, uf:n.uf||null, data_emissao:n.data||null, mes_ref:mes
+        });
+      });
+    });
+    return regs;
+  }
+  async function salvarNoBanco(){
+    dbmsg.className='dbmsg'; dbmsg.textContent='Salvando...';
+    const r=await salvarRegistros('nf_saidas', montarRegistros());
+    if(r.erro){ dbmsg.className='dbmsg err'; dbmsg.textContent='Erro: '+r.erro; return; }
+    dbmsg.className='dbmsg ok';
+    dbmsg.textContent='✓ '+r.gravados+' itens gravados · '+r.duplicados+' já existiam (ignorados). Importação limpa.';
+    notas=[];fileList=[];cancelados=new Set();render();
+  }
+  async function buscar(){
+    qmsg.className='dbmsg'; qmsg.textContent='Buscando...';
+    const r=await consultarRegistros('nf_saidas',{nf:qNf.value.trim(),texto:qTexto.value.trim(),campoTexto:'razao_social',mes:qMes.value,envioDe:qEnvioDe.value,envioAte:qEnvioAte.value});
+    if(r.erro){ qmsg.className='dbmsg err'; qmsg.textContent='Erro: '+r.erro; return; }
+    resultadosBusca=r.dados;
+    if(r.dados.length===0){ qbody.innerHTML='<tr><td colspan="19" class="empty">Nenhum registro encontrado.</td></tr>'; qmsg.textContent=''; qtotals.innerHTML=''; btnSearchXlsx.disabled=true; if(selAll)selAll.checked=false; atualizaSelecao(); return; }
+    qbody.innerHTML=r.dados.map(d=>{const col=cfopColor(d.cfop);return '<tr><td><input type="checkbox" class="rowchk" value="'+d.id+'" onchange="window.__selSai()"></td><td>'+(d.mes_ref||'')+'</td><td>'+fmtEnvio(d.created_at)+'</td><td>'+(d.nf_numero||'')+'</td><td class="desc" title="'+(d.razao_social||'')+'">'+(d.razao_social||'')+'</td><td class="desc" title="'+(d.nat_op||'')+'">'+(d.nat_op||'')+'</td><td>'+(d.uf||'')+'</td><td>'+fmtData(d.data_emissao||'')+'</td><td>'+(d.serie||'')+'</td><td>'+(d.referencia||'')+'</td><td class="desc" title="'+(d.descricao||'')+'">'+(d.descricao||'')+'</td><td>'+(d.ncm||'')+'</td><td class="cfopcell" style="color:#'+col+'">'+(d.cfop||'')+'</td><td class="num">'+fmtQtd(d.quantidade)+'</td><td class="num">'+brl(d.valor)+'</td><td class="num">'+brl(d.bc_icms)+'</td><td class="num">'+brl(d.vlr_icms)+'</td><td><span class="badge '+statusBadgeClass(d.status||'')+'">'+(d.status||'')+'</span></td><td><button class="delrow" title="Apagar este registro" onclick="window.__delSai('+d.id+')">🗑</button></td></tr>';}).join('');
+    if(selAll)selAll.checked=false; atualizaSelecao();
+    const totIcms=r.dados.reduce((s,d)=>s+(parseFloat(d.vlr_icms)||0),0), totVal=r.dados.reduce((s,d)=>s+(parseFloat(d.valor)||0),0);
+    qmsg.className='dbmsg ok'; qmsg.textContent=r.dados.length+' registros · Valor R$ '+brl(totVal)+' · ICMS R$ '+brl(totIcms);
+    renderQTotals(r.dados);
+    btnSearchXlsx.disabled=false;
+  }
+  function renderQTotals(dados){
+    const nfs=new Set(), nfsCancel=new Set(); let totVal=0, totIcms=0; const byCfop={};
+    dados.forEach(d=>{
+      const cancel=(d.status||'').startsWith('Cancelada');
+      nfs.add(d.nf_numero);
+      if(cancel) nfsCancel.add(d.nf_numero);
+      if(!cancel){ totVal+=parseFloat(d.valor)||0; totIcms+=parseFloat(d.vlr_icms)||0;
+        const cf=d.cfop||'—'; byCfop[cf]=(byCfop[cf]||0)+(parseFloat(d.vlr_icms)||0); }
+    });
+    const cfops=Object.keys(byCfop).sort();
+    const rows=cfops.map(cf=>'<div class="cfop-row"><span class="cfop-tag"><span class="dot" style="background:#'+cfopColor(cf)+'"></span>CFOP '+cf+'</span><span class="cfop-val">R$ '+brl(byCfop[cf])+'</span></div>').join('');
+    qtotals.innerHTML='<div class="tcard"><div class="lbl">NFs no filtro</div><div class="val">'+nfs.size+'</div></div>'
+      +'<div class="tcard danger"><div class="lbl">NFs canceladas</div><div class="val">'+nfsCancel.size+'</div></div>'
+      +'<div class="tcard"><div class="lbl">Total de Valor (real)</div><div class="val">R$ '+brl(totVal)+'</div></div>'
+      +'<div class="tcard"><div class="lbl">Total de ICMS (real)</div><div class="val">R$ '+brl(totIcms)+'</div></div>'
+      +'<div class="tcard cfop"><div class="lbl" style="margin-bottom:6px">ICMS por CFOP</div>'+rows+'</div>';
+  }
+  async function exportBusca(){
+    const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('Saidas');
+    const thin={style:'thin',color:{argb:'FF999999'}},border={top:thin,left:thin,bottom:thin,right:thin};
+    ['Mês','Envio','N° NF','Razão Social','Natureza Op.','UF','Data Emissão','Série','NCM','CFOP','Qtd','Valor','BC ICMS','Vlr ICMS','Status'].forEach((h,j)=>{const c=ws.getCell(1,j+1);c.value=h;c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF2F2F2'}};c.border=border;c.font={name:'Calibri',size:12,bold:true};});
+    let r=2;
+    resultadosBusca.forEach(d=>{const col=cfopColor(d.cfop);const vals=[d.mes_ref,fmtEnvio(d.created_at),d.nf_numero,d.razao_social,d.nat_op,d.uf,fmtData(d.data_emissao||''),d.serie,d.ncm,d.cfop,parseFloat(d.quantidade)||0,parseFloat(d.valor)||0,parseFloat(d.bc_icms)||0,parseFloat(d.vlr_icms)||0,d.status];vals.forEach((v,j)=>{const c=ws.getCell(r,j+1);c.value=v;c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+col}};c.border=border;c.font={name:'Calibri',size:12};if(j===10)c.numFmt='#,##0.####';if(j>=11&&j<=13)c.numFmt='#,##0.00';});r++;});
+    [10,16,12,32,28,6,14,8,12,8,10,14,14,14,14].forEach((w,i)=>ws.getColumn(i+1).width=w);
+    ws.views=[{state:'frozen',ySplit:1}]; ws.autoFilter={from:{row:1,column:1},to:{row:1,column:15}};
+    downloadBuf(await wb.xlsx.writeBuffer(),'CONSULTA_SAIDAS_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  }
+
+  function aplicaCancelamentos(){ notas.forEach(n=>{ if(cancelados.has(n.chave)) n.status='Cancelada'; }); }
+
+  async function handleFiles(list){
+    const xmls=[...list].filter(f=>f.name.toLowerCase().endsWith('.xml'));
+    if(xmls.length) viewTabsSai.activate('imp');
+    for(const f of xmls){
+      const entry={name:f.name,status:'processando...'}; fileList.push(entry); render();
+      try{
+        const doc=parseDoc(await f.text());
+        const chaveCancel=cancelChaveFromEvento(doc);
+        if(chaveCancel){
+          cancelados.add(chaveCancel); aplicaCancelamentos();
+          entry.status='ok'; entry.evento=true;
+        } else {
+          const nota=parse(doc);
+          if(nota.items.length===0){entry.status='erro';entry.err='nenhum item encontrado';}
+          else if(nota.chave && notas.some(n=>n.chave===nota.chave)){entry.status='dup';entry.err='NF já importada nesta sessão';}
+          else {entry.status='ok';entry.count=nota.items.length;
+            if(cancelados.has(nota.chave)) nota.status='Cancelada';
+            notas.push(nota);}
+        }
+      }catch(err){entry.status='erro';entry.err=err.message;}
+      render();
+    }
+  }
+  // SAIDAS: item a item, sem agrupar. Campos: NF, dataEmissao, serie, NCM, CFOP, valor(vProd), bc(vBC), icms(vICMS)
+  function parse(doc){
+    const nf=txt(doc,'nNF');
+    const serie=txt(doc,'serie');
+    const natOp=txt(doc,'natOp');
+    const dh=txt(doc,'dhEmi'); const data=dh?dh.slice(0,10):'';
+    let dest=''; let ufDest=''; const de=doc.getElementsByTagName('dest')[0];
+    if(de){ dest=txt(de,'xNome'); const ende=de.getElementsByTagName('enderDest')[0]; if(ende) ufDest=txt(ende,'UF'); }
+    const st=readStatus(doc);
+    const dets=doc.getElementsByTagName('det'); const items=[];
+    for(const det of dets){
+      const prod=det.getElementsByTagName('prod')[0]; if(!prod)continue;
+      const imp=det.getElementsByTagName('imposto')[0];
+      let vICMS='', vBC='';
+      if(imp){
+        const vi=imp.getElementsByTagName('vICMS')[0]; if(vi)vICMS=vi.textContent.trim();
+        const vb=imp.getElementsByTagName('vBC')[0]; if(vb)vBC=vb.textContent.trim();
+      }
+      items.push({nItem:det.getAttribute('nItem')||'',ref:txt(prod,'cProd'),desc:txt(prod,'xProd'),ncm:txt(prod,'NCM'),cfop:txt(prod,'CFOP'),qtd:num(txt(prod,'qCom')),valor:num(txt(prod,'vProd')),bc:num(vBC),icms:num(vICMS)});
+    }
+    return {nf,serie,natOp,data,dest,uf:ufDest,items,chave:st.chave,status:st.status};
+  }
+
+  function fmtData(iso){ if(!iso)return ''; const p=iso.split('-'); return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:iso; }
+
+  const incCancelChk=document.getElementById('incCancel-sai');
+  const filterToggle=document.getElementById('filtertoggle-sai');
+  incCancelChk.addEventListener('change',renderTotals);
+
+  function computeTotals(){
+    const incluirCancel=incCancelChk.checked;
+    const qtdCancel=notas.filter(isCancelada).length;
+    const base=incluirCancel?notas:notas.filter(n=>!isCancelada(n));
+    const flat=base.flatMap(n=>n.items);
+    const totalValor=flat.reduce((s,i)=>s+(i.valor||0),0);
+    const totalICMS=flat.reduce((s,i)=>s+(i.icms||0),0);
+    const byCfop={}; flat.forEach(i=>byCfop[i.cfop]=(byCfop[i.cfop]||0)+(i.icms||0));
+    return {qtdNotas:notas.length,qtdCancel,totalValor,totalICMS,byCfop,incluirCancel};
+  }
+  function renderTotals(){
+    if(notas.length===0){totalsEl.innerHTML='';filterToggle.style.display='none';return;}
+    const t=computeTotals(); const cfops=Object.keys(t.byCfop).sort();
+    filterToggle.style.display=t.qtdCancel>0?'flex':'none';
+    const rows=cfops.map(cf=>'<div class="cfop-row"><span class="cfop-tag"><span class="dot" style="background:#'+cfopColor(cf)+'"></span>CFOP '+cf+'</span><span class="cfop-val">R$ '+brl(t.byCfop[cf])+'</span></div>').join('');
+    const sfx=t.incluirCancel?' (com canceladas)':' (real)';
+    totalsEl.innerHTML='<div class="tcard"><div class="lbl">Notas importadas</div><div class="val">'+t.qtdNotas+'</div></div>'
+      +'<div class="tcard danger"><div class="lbl">NFs canceladas</div><div class="val">'+t.qtdCancel+'</div></div>'
+      +'<div class="tcard"><div class="lbl">Total de Valor'+sfx+'</div><div class="val">R$ '+brl(t.totalValor)+'</div></div>'
+      +'<div class="tcard"><div class="lbl">Total de ICMS'+sfx+'</div><div class="val">R$ '+brl(t.totalICMS)+'</div></div>'
+      +'<div class="tcard cfop"><div class="lbl" style="margin-bottom:6px">ICMS por CFOP</div>'+rows+'</div>';
+  }
+  function render(){
+    filesEl.innerHTML=fileList.map(f=>{let st=f.status,cls='';if(f.status==='ok'){st=f.evento?'✓ evento cancelamento':('✓ '+f.count+' itens');cls='ok';}if(f.status==='dup'){st='⚠ '+(f.err||'duplicada');cls='';}if(f.status==='erro'){st='✗ '+(f.err||'erro');cls='err';}return '<div class="file"><span class="nm">'+f.name+'</span><span class="st '+cls+'" style="'+(f.status==='dup'?'color:#facc15':'')+'">'+st+'</span></div>';}).join('');
+    const flat=notas.flatMap(n=>n.items.map(i=>({nf:n.nf,dest:n.dest,natOp:n.natOp,uf:n.uf,data:n.data,serie:n.serie,status:n.status,...i})));
+    if(flat.length===0)tbody.innerHTML='<tr><td colspan="15" class="empty">Nenhum item extraído ainda.</td></tr>';
+    else tbody.innerHTML=flat.map(r=>{const col=cfopColor(r.cfop);return '<tr><td>'+r.nf+'</td><td class="desc" title="'+r.dest+'">'+r.dest+'</td><td class="desc" title="'+(r.natOp||'')+'">'+(r.natOp||'')+'</td><td>'+(r.uf||'')+'</td><td>'+fmtData(r.data)+'</td><td>'+r.serie+'</td><td>'+(r.ref||'')+'</td><td class="desc" title="'+(r.desc||'')+'">'+(r.desc||'')+'</td><td>'+r.ncm+'</td><td class="cfopcell" style="color:#'+col+'">'+r.cfop+'</td><td class="num">'+fmtQtd(r.qtd)+'</td><td class="num">'+brl(r.valor)+'</td><td class="num">'+brl(r.bc)+'</td><td class="num">'+brl(r.icms)+'</td><td><span class="badge '+statusBadgeClass(r.status)+'">'+r.status+'</span></td></tr>';}).join('');
+    countEl.textContent=flat.length?(flat.length+' itens · '+notas.length+' nota(s)'):'';
+    btnExport.disabled=notas.length===0; btnExportList.disabled=notas.length===0; btnClear.disabled=fileList.length===0;
+    btnSaveDb.disabled=notas.length===0;
+    renderTotals();
+  }
+
+  // SAIDAS blocos: cabecalho NF (linha 2-3), header colunas (linha 6), itens
+  async function exportBlocos(){
+    const wb=new ExcelJS.Workbook(), ws=wb.addWorksheet('NF Saidas');
+    const STEP=6,HEADER_ROW=6,FIRST_ITEM=7;
+    const thin={style:'thin',color:{argb:'FF999999'}}, border={top:thin,left:thin,bottom:thin,right:thin};
+    const ORANGE='FCE4D6',GREYHEAD='F2F2F2';
+    notas.forEach((nota,bi)=>{
+      const c0=bi*STEP+1;
+      ws.getCell(1,c0).value='Cliente'; ws.getCell(1,c0+1).value=nota.dest; ws.mergeCells(1,c0+1,1,c0+4);
+      for(let c=c0;c<=c0+4;c++){const cell=ws.getCell(1,c);cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+ORANGE}};cell.border=border;cell.font={name:'Calibri',size:12,bold:(c>c0)};cell.alignment={horizontal:(c===c0)?'center':'left',vertical:'middle'};}
+      ws.getCell(2,c0).value='N° NF'; ws.getCell(2,c0+1).value=/^\d+$/.test(nota.nf)?parseInt(nota.nf):nota.nf; ws.mergeCells(2,c0+1,2,c0+3);
+      ws.getCell(2,c0+4).value='Série '+nota.serie;
+      ws.getCell(3,c0).value='Emissão'; ws.getCell(3,c0+1).value=fmtData(nota.data); ws.mergeCells(3,c0+1,3,c0+2);
+      ws.getCell(3,c0+3).value='UF: '+(nota.uf||''); ws.getCell(3,c0+4).value=nota.status;
+      ws.getCell(4,c0).value='Nat. Op.'; ws.getCell(4,c0+1).value=(nota.natOp||''); ws.mergeCells(4,c0+1,4,c0+4);
+      for(let r=2;r<=4;r++)for(let c=c0;c<=c0+4;c++){const cell=ws.getCell(r,c);cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+ORANGE}};cell.border=border;cell.font={name:'Calibri',size:12,bold:(c>c0)};cell.alignment={horizontal:(c===c0)?'center':'left',vertical:'middle'};}
+      if(nota.status&&nota.status.startsWith('Cancelada')){ws.getCell(3,c0+4).font={name:'Calibri',size:12,bold:true,color:{argb:'FFC00000'}};}
+      ['NCM','CFOP','Valor','BC ICMS','Vlr ICMS'].forEach((h,j)=>{const cell=ws.getCell(HEADER_ROW,c0+j);cell.value=h;cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+GREYHEAD}};cell.border=border;cell.font={name:'Calibri',size:12,bold:true};cell.alignment={horizontal:'center',vertical:'middle'};});
+      nota.items.forEach((it,k)=>{const r=FIRST_ITEM+k,color=cfopColor(it.cfop),vals=[it.ncm,it.cfop,it.valor,it.bc,it.icms];vals.forEach((v,j)=>{const cell=ws.getCell(r,c0+j);cell.value=v;cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+color}};cell.border=border;cell.font={name:'Calibri',size:12};if(j>=2){cell.numFmt='#,##0.00';}cell.alignment={horizontal:'center'};});});
+      ws.getColumn(c0).width=12;ws.getColumn(c0+1).width=10;ws.getColumn(c0+2).width=14;ws.getColumn(c0+3).width=14;ws.getColumn(c0+4).width=14;ws.getColumn(c0+5).width=2.5;
+    });
+    downloadBuf(await wb.xlsx.writeBuffer(),'SAIDAS_blocos_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  }
+  async function exportLista(){
+    const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('NF Saidas');
+    const thin={style:'thin',color:{argb:'FF999999'}},border={top:thin,left:thin,bottom:thin,right:thin};
+    ['N° NF','Razão Social','Natureza Op.','UF','Data Emissão','Série','NCM','CFOP','Valor','BC ICMS','Vlr ICMS','Status'].forEach((h,j)=>{const c=ws.getCell(1,j+1);c.value=h;c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF2F2F2'}};c.border=border;c.font={name:'Calibri',size:12,bold:true};c.alignment={horizontal:(j>=5)?'center':'left',vertical:'middle'};});
+    let r=2;
+    notas.forEach(n=>n.items.forEach(it=>{const col=cfopColor(it.cfop),vals=[/^\d+$/.test(n.nf)?parseInt(n.nf):n.nf,n.dest,n.natOp,n.uf,fmtData(n.data),n.serie,it.ncm,it.cfop,it.valor,it.bc,it.icms,n.status];vals.forEach((v,j)=>{const c=ws.getCell(r,j+1);c.value=v;c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF'+col}};c.border=border;c.font={name:'Calibri',size:12};if(j>=8&&j<=10){c.numFmt='#,##0.00';c.alignment={horizontal:'center'};}else if(j>=4){c.alignment={horizontal:'center'};}else c.alignment={horizontal:'left'};if(j===11&&n.status&&n.status.startsWith('Cancelada')){c.font={name:'Calibri',size:12,bold:true,color:{argb:'FFC00000'}};}});r++;}));
+    ws.getColumn(1).width=12;ws.getColumn(2).width=32;ws.getColumn(3).width=28;ws.getColumn(4).width=6;ws.getColumn(5).width=14;ws.getColumn(6).width=8;ws.getColumn(7).width=12;ws.getColumn(8).width=10;ws.getColumn(9).width=14;ws.getColumn(10).width=14;ws.getColumn(11).width=14;ws.getColumn(12).width=14;
+    ws.views=[{state:'frozen',ySplit:1}]; ws.autoFilter={from:{row:1,column:1},to:{row:1,column:12}};
+    downloadBuf(await wb.xlsx.writeBuffer(),'SAIDAS_lista_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  }
+})();
+
+// download compartilhado
+function downloadBuf(buf, filename){
+  const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+
+// ========================================================================
+//  MODULO DASHBOARD DE VENDAS (saidas)
+// ========================================================================
+(function(){
+  const elDe=document.getElementById('dashDe'), elAte=document.getElementById('dashAte');
+  const elAtalho=document.getElementById('dashAtalho'), elTopN=document.getElementById('dashTopN');
+  const elOrder=document.getElementById('dashOrder'), elProd=document.getElementById('dashProd');
+  const elProdClear=document.getElementById('dashProdClear'), elProdList=document.getElementById('dashProdList');
+  const elMsg=document.getElementById('dashMsg'), elKpis=document.getElementById('dashKpis');
+  const elRankBody=document.getElementById('dashRankBody'), elRankMsg=document.getElementById('dashRankMsg');
+  const btnBuscar=document.getElementById('dashBuscar'), btnXlsx=document.getElementById('dashXlsx');
+  let charts={}, rankingAtual=[], jaCarregou=false;
+
+  // Busca paginada das saidas por intervalo de DATA DE EMISSAO
+  async function buscarSaidas(de, ate){
+    if(!sb) return {dados:[],erro:'Supabase nao conectado'};
+    const PAGE=1000; let from=0; let todos=[];
+    for(let i=0;i<100;i++){
+      let q=sb.from('nf_saidas').select('*').order('data_emissao',{ascending:true}).order('id',{ascending:true});
+      if(de)  q=q.gte('data_emissao', de);
+      if(ate) q=q.lte('data_emissao', ate);
+      const {data,error}=await q.range(from, from+PAGE-1);
+      if(error) return {dados:[],erro:error.message};
+      if(!data||data.length===0) break;
+      todos=todos.concat(data);
+      if(data.length<PAGE) break;
+      from+=PAGE;
+    }
+    return {dados:todos, erro:null};
+  }
+
+  // Atalhos de periodo -> preenche de/ate
+  function aplicaAtalho(v){
+    if(!v) return;
+    const hoje=new Date(); const fmt=d=>d.toISOString().slice(0,10);
+    if(v==='mes'){ elDe.value=fmt(new Date(hoje.getFullYear(),hoje.getMonth(),1)); elAte.value=fmt(hoje); }
+    else if(v==='3m'){ elDe.value=fmt(new Date(hoje.getFullYear(),hoje.getMonth()-2,1)); elAte.value=fmt(hoje); }
+    else if(v==='6m'){ elDe.value=fmt(new Date(hoje.getFullYear(),hoje.getMonth()-5,1)); elAte.value=fmt(hoje); }
+    else if(v==='ano'){ elDe.value=fmt(new Date(hoje.getFullYear(),0,1)); elAte.value=fmt(hoje); }
+    else if(v==='tudo'){ elDe.value=''; elAte.value=''; }
+  }
+  elAtalho.addEventListener('change',()=>aplicaAtalho(elAtalho.value));
+  elDe.addEventListener('change',()=>{elAtalho.value='';});
+  elAte.addEventListener('change',()=>{elAtalho.value='';});
+
+  const mesNomes=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  function mesLabel(ym){ const [y,m]=ym.split('-'); return mesNomes[parseInt(m)-1]+'/'+y.slice(2); }
+
+  function agrega(dados){
+    // ignora canceladas
+    const valid=dados.filter(d=>!(d.status||'').startsWith('Cancelada'));
+    // por mes (data_emissao AAAA-MM)
+    const porMes={};
+    // por produto (referencia)
+    const porProd={};
+    const porCfopVal={}, porCfopIcms={};
+    let totFat=0, totQtd=0; const nfsSet=new Set();
+    valid.forEach(d=>{
+      const val=parseFloat(d.valor)||0, qtd=parseFloat(d.quantidade)||0, icms=parseFloat(d.vlr_icms)||0;
+      totFat+=val; totQtd+=qtd; nfsSet.add(d.nf_numero);
+      const ym=(d.data_emissao||'').slice(0,7);
+      if(ym){ if(!porMes[ym])porMes[ym]={fat:0,qtd:0,icms:0}; porMes[ym].fat+=val; porMes[ym].qtd+=qtd; porMes[ym].icms+=icms; }
+      const ref=(d.referencia||'(sem ref)')+'';
+      if(!porProd[ref]) porProd[ref]={ref,desc:d.descricao||'',qtd:0,fat:0,nfs:new Set()};
+      porProd[ref].qtd+=qtd; porProd[ref].fat+=val; porProd[ref].nfs.add(d.nf_numero);
+      const cf=d.cfop||'—'; porCfopVal[cf]=(porCfopVal[cf]||0)+val; porCfopIcms[cf]=(porCfopIcms[cf]||0)+icms;
+    });
+    const meses=Object.keys(porMes).sort();
+    const prods=Object.values(porProd).map(p=>({...p,nfs:p.nfs.size,ticket:p.qtd>0?p.fat/p.qtd:0,pct:totFat>0?p.fat/totFat*100:0}));
+    return {valid,porMes,meses,prods,porCfopVal,porCfopIcms,totFat,totQtd,nNFs:nfsSet.size};
+  }
+
+  function destroiCharts(){ Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}}); charts={}; }
+
+  const PALETA=['#3b82f6','#22c55e','#f8de07','#ef4444','#a855f7','#fb923c','#06b6d4','#ec4899','#84cc16','#eab308','#6366f1','#14b8a6','#f43f5e','#8b5cf6','#0ea5e9','#10b981','#f59e0b','#d946ef','#64748b','#fbbf24'];
+  const gridColor='rgba(255,255,255,0.06)', tickColor='#9a9a9a';
+
+  function barChartV(ctx,labels,data,label,cor){
+    // cada mes/barra com uma cor diferente (paleta amarela da marca)
+    const cores=labels.map((_,i)=>PALETA[i%PALETA.length]);
+    return new Chart(ctx,{type:'bar',data:{labels,datasets:[{label,data,backgroundColor:cores,borderColor:cores,borderWidth:1}]},
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tickColor},grid:{color:gridColor}},y:{ticks:{color:tickColor},grid:{color:gridColor},beginAtZero:true}}}});
+  }
+  function lineChart(ctx,labels,data,label,cor){
+    return new Chart(ctx,{type:'line',data:{labels,datasets:[{label,data,borderColor:cor,backgroundColor:cor+'33',fill:true,tension:0.3,pointRadius:3}]},
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tickColor},grid:{color:gridColor}},y:{ticks:{color:tickColor},grid:{color:gridColor},beginAtZero:true}}}});
+  }
+  function barChart(ctx,labels,data,label){
+    return new Chart(ctx,{type:'bar',data:{labels,datasets:[{label,data,backgroundColor:labels.map((_,i)=>PALETA[i%PALETA.length])}]},
+      options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tickColor},grid:{color:gridColor},beginAtZero:true},y:{ticks:{color:tickColor},grid:{display:false}}}}});
+  }
+
+  let ultimoAgregado=null, ultimosDados=[];
+  async function atualizar(){
+    elMsg.className='dbmsg'; elMsg.textContent='Carregando dados das vendas...';
+    const r=await buscarSaidas(elDe.value, elAte.value);
+    if(r.erro){ elMsg.className='dbmsg err'; elMsg.textContent='Erro: '+r.erro; return; }
+    if(r.dados.length===0){ elMsg.className='dbmsg err'; elMsg.textContent='Nenhuma venda encontrada no período.'; destroiCharts(); elKpis.innerHTML=''; elRankBody.innerHTML='<tr><td colspan="8" class="empty">Sem dados.</td></tr>'; btnXlsx.disabled=true; return; }
+    ultimosDados=r.dados;
+    // preenche datalist de produtos (referencias distintas)
+    const refs=[...new Set(r.dados.map(d=>(d.referencia||'').trim()).filter(Boolean))].sort();
+    elProdList.innerHTML=refs.map(rf=>'<option value="'+rf+'">').join('');
+    redesenhar();
+  }
+  function redesenhar(){
+    if(ultimosDados.length===0) return;
+    const a=agrega(ultimosDados);
+    ultimoAgregado=a;
+    const prodFiltro=(elProd.value||'').trim().toUpperCase();
+
+    // KPIs (gerais do periodo)
+    const ticketGeral=a.totQtd>0?a.totFat/a.totQtd:0;
+    elMsg.className='dbmsg ok'; elMsg.textContent='✓ '+a.valid.length+' itens · '+a.nNFs+' NFs · '+a.meses.length+' mês(es) no período.';
+    elKpis.innerHTML='<div class="tcard"><div class="lbl">Faturamento total</div><div class="val">R$ '+brl(a.totFat)+'</div></div>'
+      +'<div class="tcard"><div class="lbl">Quantidade total</div><div class="val">'+fmtQtd(a.totQtd)+'</div></div>'
+      +'<div class="tcard"><div class="lbl">NFs no período</div><div class="val">'+a.nNFs+'</div></div>'
+      +'<div class="tcard"><div class="lbl">Produtos distintos</div><div class="val">'+a.prods.length+'</div></div>'
+      +'<div class="tcard"><div class="lbl">Ticket médio (R$/un)</div><div class="val">R$ '+brl(ticketGeral)+'</div></div>';
+
+    destroiCharts();
+    const labelsMes=a.meses.map(mesLabel);
+    // Se houver produto filtrado, os graficos mensais mostram a evolucao DESSE produto
+    let serieFat, serieQtd, tituloSufixo='';
+    if(prodFiltro){
+      const porMesProd={}; a.meses.forEach(m=>porMesProd[m]={fat:0,qtd:0});
+      a.valid.forEach(d=>{ if((d.referencia||'').trim().toUpperCase()===prodFiltro){ const ym=(d.data_emissao||'').slice(0,7); if(porMesProd[ym]){ porMesProd[ym].fat+=parseFloat(d.valor)||0; porMesProd[ym].qtd+=parseFloat(d.quantidade)||0; } } });
+      serieFat=a.meses.map(m=>porMesProd[m].fat); serieQtd=a.meses.map(m=>porMesProd[m].qtd);
+      tituloSufixo=' — '+prodFiltro;
+    } else {
+      serieFat=a.meses.map(m=>a.porMes[m].fat); serieQtd=a.meses.map(m=>a.porMes[m].qtd);
+    }
+    document.getElementById('chartFatMes').previousElementSibling; // noop
+    charts.fatMes=barChartV(document.getElementById('chartFatMes'),labelsMes,serieFat,'Faturamento','#f8de07');
+    charts.qtdMes=barChartV(document.getElementById('chartQtdMes'),labelsMes,serieQtd,'Quantidade','#facc15');
+    // atualiza titulos dos cards mensais
+    document.querySelector('#chartFatMes').closest('.dashcard').querySelector('h4').textContent='Faturamento por mês'+tituloSufixo;
+    document.querySelector('#chartQtdMes').closest('.dashcard').querySelector('h4').textContent='Quantidade vendida por mês'+tituloSufixo;
+
+    const topN=parseInt(elTopN.value)||15;
+    const topFat=[...a.prods].sort((x,y)=>y.fat-x.fat).slice(0,topN);
+    const topQtd=[...a.prods].sort((x,y)=>y.qtd-x.qtd).slice(0,topN);
+    // Valor por CFOP e ICMS por CFOP (substituem os top produtos em barra)
+    const cfopVal=Object.entries(a.porCfopVal).sort((x,y)=>y[1]-x[1]);
+    const cfopIcms=Object.entries(a.porCfopIcms).sort((x,y)=>y[1]-x[1]);
+    charts.valCfop=barChart(document.getElementById('chartValCfop'),cfopVal.map(c=>'CFOP '+c[0]),cfopVal.map(c=>c[1]),'Valor');
+    charts.icmsCfop=barChart(document.getElementById('chartIcmsCfop'),cfopIcms.map(c=>'CFOP '+c[0]),cfopIcms.map(c=>c[1]),'ICMS');
+    // ICMS por mes e ticket medio por mes
+    charts.icmsMes=barChartV(document.getElementById('chartIcmsMes'),labelsMes,a.meses.map(m=>a.porMes[m].icms||0),'ICMS','#f8de07');
+    charts.ticketMes=barChartV(document.getElementById('chartTicketMes'),labelsMes,a.meses.map(m=>{const pm=a.porMes[m];return pm.qtd>0?pm.fat/pm.qtd:0;}),'Ticket','#facc15');
+
+    // Ranking ordenado conforme escolha
+    const ord=elOrder.value==='qtd'?(x,y)=>y.qtd-x.qtd:(x,y)=>y.fat-x.fat;
+    rankingAtual=[...a.prods].sort(ord).slice(0,topN);
+    elRankBody.innerHTML=rankingAtual.map((p,i)=>'<tr><td>'+(i+1)+'</td><td>'+p.ref+'</td><td class="desc" title="'+(p.desc||'')+'">'+(p.desc||'')+'</td><td class="num">'+fmtQtd(p.qtd)+'</td><td class="num">R$ '+brl(p.fat)+'</td><td class="num">R$ '+brl(p.ticket)+'</td><td class="num">'+p.nfs+'</td><td class="num">'+p.pct.toFixed(1)+'%</td></tr>').join('');
+    elRankMsg.className='dbmsg ok'; elRankMsg.textContent='Top '+rankingAtual.length+' produtos por '+(elOrder.value==='qtd'?'quantidade':'faturamento')+' (de '+a.prods.length+' no período).';
+    btnXlsx.disabled=false;
+  }
+  btnBuscar.addEventListener('click',atualizar);
+  elOrder.addEventListener('change',redesenhar);
+  elTopN.addEventListener('change',redesenhar);
+  elProd.addEventListener('change',redesenhar);
+  elProdClear.addEventListener('click',()=>{elProd.value='';redesenhar();});
+
+  async function exportRanking(){
+    if(!rankingAtual.length) return;
+    const wb=new ExcelJS.Workbook(), ws=wb.addWorksheet('Ranking Produtos');
+    const thin={style:'thin',color:{argb:'FF999999'}},border={top:thin,left:thin,bottom:thin,right:thin};
+    ['#','Referência','Descrição','Qtd vendida','Faturamento','Ticket médio','Nº NFs','% faturamento'].forEach((h,j)=>{const c=ws.getCell(1,j+1);c.value=h;c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF2F2F2'}};c.border=border;c.font={name:'Calibri',size:12,bold:true};});
+    let r=2;
+    rankingAtual.forEach((p,i)=>{const vals=[i+1,p.ref,p.desc,p.qtd,p.fat,p.ticket,p.nfs,p.pct/100];vals.forEach((v,j)=>{const c=ws.getCell(r,j+1);c.value=v;c.border=border;c.font={name:'Calibri',size:12};if(j===3)c.numFmt='#,##0.####';if(j===4||j===5)c.numFmt='#,##0.00';if(j===7)c.numFmt='0.0%';});r++;});
+    [6,16,44,14,16,14,8,14].forEach((w,i)=>ws.getColumn(i+1).width=w);
+    ws.views=[{state:'frozen',ySplit:1}]; ws.autoFilter={from:{row:1,column:1},to:{row:1,column:8}};
+    downloadBuf(await wb.xlsx.writeBuffer(),'RANKING_PRODUTOS_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  }
+  btnXlsx.addEventListener('click',exportRanking);
+
+  // Inicializa ao abrir a aba pela primeira vez
+  window.__initDash=function(){ if(jaCarregou)return; jaCarregou=true; aplicaAtalho('tudo'); atualizar(); };
+})();
+
+// ========================================================================
+//  MODULO DASHBOARD DE COMPRAS (entradas)
+// ========================================================================
+(function(){
+  const elDe=document.getElementById('dcDe'), elAte=document.getElementById('dcAte');
+  const elAtalho=document.getElementById('dcAtalho'), elTopN=document.getElementById('dcTopN');
+  const elOrder=document.getElementById('dcOrder'), elProd=document.getElementById('dcProd');
+  const elProdClear=document.getElementById('dcProdClear'), elProdList=document.getElementById('dcProdList');
+  const elMsg=document.getElementById('dcMsg'), elKpis=document.getElementById('dcKpis');
+  const elRankBody=document.getElementById('dcRankBody'), elRankMsg=document.getElementById('dcRankMsg');
+  const btnBuscar=document.getElementById('dcBuscar'), btnXlsx=document.getElementById('dcXlsx');
+  let charts={}, rankingAtual=[], jaCarregou=false, ultimosDados=[];
+
+  async function buscarEntradas(de, ate){
+    if(!sb) return {dados:[],erro:'Supabase nao conectado'};
+    const PAGE=1000; let from=0; let todos=[];
+    for(let i=0;i<100;i++){
+      // ordena por id (data_emissao pode estar vazia em registros antigos)
+      let q=sb.from('nf_entradas').select('*').order('id',{ascending:true});
+      const {data,error}=await q.range(from, from+PAGE-1);
+      if(error) return {dados:[],erro:error.message};
+      if(!data||data.length===0) break;
+      todos=todos.concat(data);
+      if(data.length<PAGE) break;
+      from+=PAGE;
+    }
+    // data efetiva = data_emissao OU primeiro dia do mes_ref (fallback p/ registros sem data)
+    todos.forEach(d=>{ d.__data = d.data_emissao || (d.mes_ref ? d.mes_ref+'-01' : ''); });
+    // filtro por periodo no cliente (usando data efetiva)
+    if(de)  todos=todos.filter(d=>d.__data && d.__data>=de);
+    if(ate) todos=todos.filter(d=>d.__data && d.__data<=ate);
+    return {dados:todos, erro:null};
+  }
+  function aplicaAtalho(v){
+    if(!v) return;
+    const hoje=new Date(); const fmt=d=>d.toISOString().slice(0,10);
+    if(v==='mes'){ elDe.value=fmt(new Date(hoje.getFullYear(),hoje.getMonth(),1)); elAte.value=fmt(hoje); }
+    else if(v==='3m'){ elDe.value=fmt(new Date(hoje.getFullYear(),hoje.getMonth()-2,1)); elAte.value=fmt(hoje); }
+    else if(v==='6m'){ elDe.value=fmt(new Date(hoje.getFullYear(),hoje.getMonth()-5,1)); elAte.value=fmt(hoje); }
+    else if(v==='ano'){ elDe.value=fmt(new Date(hoje.getFullYear(),0,1)); elAte.value=fmt(hoje); }
+    else if(v==='tudo'){ elDe.value=''; elAte.value=''; }
+  }
+  elAtalho.addEventListener('change',()=>aplicaAtalho(elAtalho.value));
+  elDe.addEventListener('change',()=>{elAtalho.value='';});
+  elAte.addEventListener('change',()=>{elAtalho.value='';});
+
+  const mesNomes=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  function mesLabel(ym){ const [y,m]=ym.split('-'); return mesNomes[parseInt(m)-1]+'/'+y.slice(2); }
+  const PALETA=['#3b82f6','#22c55e','#f8de07','#ef4444','#a855f7','#fb923c','#06b6d4','#ec4899','#84cc16','#eab308','#6366f1','#14b8a6','#f43f5e','#8b5cf6','#0ea5e9','#10b981','#f59e0b','#d946ef','#64748b','#fbbf24'];
+  const gridColor='rgba(255,255,255,0.06)', tickColor='#9a9a9a';
+
+  function barChartV(ctx,labels,data,label,cor){
+    // cada mes/barra com uma cor diferente (paleta amarela da marca)
+    const cores=labels.map((_,i)=>PALETA[i%PALETA.length]);
+    return new Chart(ctx,{type:'bar',data:{labels,datasets:[{label,data,backgroundColor:cores,borderColor:cores,borderWidth:1}]},
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tickColor},grid:{color:gridColor}},y:{ticks:{color:tickColor},grid:{color:gridColor},beginAtZero:true}}}});
+  }
+  function barChartH(ctx,labels,data,label){
+    return new Chart(ctx,{type:'bar',data:{labels,datasets:[{label,data,backgroundColor:labels.map((_,i)=>PALETA[i%PALETA.length])}]},
+      options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tickColor},grid:{color:gridColor},beginAtZero:true},y:{ticks:{color:tickColor},grid:{display:false}}}}});
+  }
+  function destroiCharts(){ Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}}); charts={}; }
+
+  function agrega(dados){
+    const valid=dados.filter(d=>!(d.status||'').startsWith('Cancelada'));
+    const porMes={}, porProd={}, porForn={}, porCfop={};
+    let totVal=0, totQtd=0; const nfsSet=new Set();
+    valid.forEach(d=>{
+      const val=parseFloat(d.vlr_total)||0, qtd=parseFloat(d.quantidade)||0, icms=parseFloat(d.vlr_icms)||0;
+      totVal+=val; totQtd+=qtd; nfsSet.add(d.nf_numero);
+      const ym=(d.__data||'').slice(0,7);
+      if(ym){ if(!porMes[ym])porMes[ym]={fat:0,qtd:0,icms:0}; porMes[ym].fat+=val; porMes[ym].qtd+=qtd; porMes[ym].icms+=icms; }
+      const ref=(d.referencia||'(sem ref)')+'';
+      if(!porProd[ref]) porProd[ref]={ref,desc:d.descricao||'',qtd:0,fat:0,nfs:new Set()};
+      porProd[ref].qtd+=qtd; porProd[ref].fat+=val; porProd[ref].nfs.add(d.nf_numero);
+      const forn=(d.emitente||'(sem fornecedor)')+'';
+      porForn[forn]=(porForn[forn]||0)+val;
+      const cf=d.cfop||'—'; porCfop[cf]=(porCfop[cf]||0)+val;
+    });
+    const meses=Object.keys(porMes).sort();
+    const prods=Object.values(porProd).map(p=>({...p,nfs:p.nfs.size,ticket:p.qtd>0?p.fat/p.qtd:0,pct:totVal>0?p.fat/totVal*100:0}));
+    return {valid,porMes,meses,prods,porForn,porCfop,totVal,totQtd,nNFs:nfsSet.size};
+  }
+
+  let ultimoAgregado=null;
+  async function atualizar(){
+    elMsg.className='dbmsg'; elMsg.textContent='Carregando dados das compras...';
+    const r=await buscarEntradas(elDe.value, elAte.value);
+    if(r.erro){ elMsg.className='dbmsg err'; elMsg.textContent='Erro: '+r.erro; return; }
+    if(r.dados.length===0){ elMsg.className='dbmsg err'; elMsg.textContent='Nenhuma compra encontrada no período.'; destroiCharts(); elKpis.innerHTML=''; elRankBody.innerHTML='<tr><td colspan="8" class="empty">Sem dados.</td></tr>'; btnXlsx.disabled=true; return; }
+    ultimosDados=r.dados;
+    const refs=[...new Set(r.dados.map(d=>(d.referencia||'').trim()).filter(Boolean))].sort();
+    elProdList.innerHTML=refs.map(rf=>'<option value="'+rf+'">').join('');
+    redesenhar();
+  }
+  function redesenhar(){
+    if(ultimosDados.length===0) return;
+    const a=agrega(ultimosDados); ultimoAgregado=a;
+    const prodFiltro=(elProd.value||'').trim().toUpperCase();
+    const custoGeral=a.totQtd>0?a.totVal/a.totQtd:0;
+    elMsg.className='dbmsg ok'; elMsg.textContent='✓ '+a.valid.length+' itens · '+a.nNFs+' NFs · '+a.meses.length+' mês(es) no período.';
+    elKpis.innerHTML='<div class="tcard"><div class="lbl">Valor total comprado</div><div class="val">R$ '+brl(a.totVal)+'</div></div>'
+      +'<div class="tcard"><div class="lbl">Quantidade total</div><div class="val">'+fmtQtd(a.totQtd)+'</div></div>'
+      +'<div class="tcard"><div class="lbl">NFs no período</div><div class="val">'+a.nNFs+'</div></div>'
+      +'<div class="tcard"><div class="lbl">Produtos distintos</div><div class="val">'+a.prods.length+'</div></div>'
+      +'<div class="tcard"><div class="lbl">Custo médio (R$/un)</div><div class="val">R$ '+brl(custoGeral)+'</div></div>';
+
+    destroiCharts();
+    const labelsMes=a.meses.map(mesLabel);
+    let serieFat, serieQtd, sufixo='';
+    if(prodFiltro){
+      const pm={}; a.meses.forEach(m=>pm[m]={fat:0,qtd:0});
+      a.valid.forEach(d=>{ if((d.referencia||'').trim().toUpperCase()===prodFiltro){ const ym=(d.__data||'').slice(0,7); if(pm[ym]){ pm[ym].fat+=parseFloat(d.vlr_total)||0; pm[ym].qtd+=parseFloat(d.quantidade)||0; } } });
+      serieFat=a.meses.map(m=>pm[m].fat); serieQtd=a.meses.map(m=>pm[m].qtd); sufixo=' — '+prodFiltro;
+    } else { serieFat=a.meses.map(m=>a.porMes[m].fat); serieQtd=a.meses.map(m=>a.porMes[m].qtd); }
+    charts.fatMes=barChartV(document.getElementById('dcChartFatMes'),labelsMes,serieFat,'Valor','#f8de07');
+    charts.qtdMes=barChartV(document.getElementById('dcChartQtdMes'),labelsMes,serieQtd,'Quantidade','#facc15');
+    document.querySelector('#dcChartFatMes').closest('.dashcard').querySelector('h4').textContent='Valor comprado por mês'+sufixo;
+    document.querySelector('#dcChartQtdMes').closest('.dashcard').querySelector('h4').textContent='Quantidade comprada por mês'+sufixo;
+
+    const topN=parseInt(elTopN.value)||15;
+    const topFat=[...a.prods].sort((x,y)=>y.fat-x.fat).slice(0,topN);
+    const topQtd=[...a.prods].sort((x,y)=>y.qtd-x.qtd).slice(0,topN);
+    charts.topFat=barChartH(document.getElementById('dcChartTopFat'),topFat.map(p=>p.ref),topFat.map(p=>p.fat),'Valor');
+    charts.topQtd=barChartH(document.getElementById('dcChartTopQtd'),topQtd.map(p=>p.ref),topQtd.map(p=>p.qtd),'Quantidade');
+
+    const fornArr=Object.entries(a.porForn).sort((x,y)=>y[1]-x[1]).slice(0,10);
+    charts.forn=barChartH(document.getElementById('dcChartForn'),fornArr.map(f=>f[0].length>22?f[0].slice(0,22)+'…':f[0]),fornArr.map(f=>f[1]),'Valor');
+    const cfopArr=Object.entries(a.porCfop).sort((x,y)=>y[1]-x[1]);
+    charts.cfop=barChartH(document.getElementById('dcChartCfop'),cfopArr.map(c=>'CFOP '+c[0]),cfopArr.map(c=>c[1]),'Valor');
+    charts.icmsMes=barChartV(document.getElementById('dcChartIcmsMes'),labelsMes,a.meses.map(m=>a.porMes[m].icms||0),'ICMS','#f8de07');
+    charts.custoMes=barChartV(document.getElementById('dcChartCustoMes'),labelsMes,a.meses.map(m=>{const pm=a.porMes[m];return pm.qtd>0?pm.fat/pm.qtd:0;}),'Custo','#facc15');
+
+    const ord=elOrder.value==='qtd'?(x,y)=>y.qtd-x.qtd:(x,y)=>y.fat-x.fat;
+    rankingAtual=[...a.prods].sort(ord).slice(0,topN);
+    elRankBody.innerHTML=rankingAtual.map((p,i)=>'<tr><td>'+(i+1)+'</td><td>'+p.ref+'</td><td class="desc" title="'+(p.desc||'')+'">'+(p.desc||'')+'</td><td class="num">'+fmtQtd(p.qtd)+'</td><td class="num">R$ '+brl(p.fat)+'</td><td class="num">R$ '+brl(p.ticket)+'</td><td class="num">'+p.nfs+'</td><td class="num">'+p.pct.toFixed(1)+'%</td></tr>').join('');
+    elRankMsg.className='dbmsg ok'; elRankMsg.textContent='Top '+rankingAtual.length+' produtos por '+(elOrder.value==='qtd'?'quantidade':'valor comprado')+' (de '+a.prods.length+' no período).';
+    btnXlsx.disabled=false;
+  }
+  btnBuscar.addEventListener('click',atualizar);
+  elOrder.addEventListener('change',redesenhar);
+  elTopN.addEventListener('change',redesenhar);
+  elProd.addEventListener('change',redesenhar);
+  elProdClear.addEventListener('click',()=>{elProd.value='';redesenhar();});
+
+  async function exportRanking(){
+    if(!rankingAtual.length) return;
+    const wb=new ExcelJS.Workbook(), ws=wb.addWorksheet('Ranking Compras');
+    const thin={style:'thin',color:{argb:'FF999999'}},border={top:thin,left:thin,bottom:thin,right:thin};
+    ['#','Referência','Descrição','Qtd comprada','Valor','Custo médio','Nº NFs','% do total'].forEach((h,j)=>{const c=ws.getCell(1,j+1);c.value=h;c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF2F2F2'}};c.border=border;c.font={name:'Calibri',size:12,bold:true};});
+    let r=2;
+    rankingAtual.forEach((p,i)=>{const vals=[i+1,p.ref,p.desc,p.qtd,p.fat,p.ticket,p.nfs,p.pct/100];vals.forEach((v,j)=>{const c=ws.getCell(r,j+1);c.value=v;c.border=border;c.font={name:'Calibri',size:12};if(j===3)c.numFmt='#,##0.####';if(j===4||j===5)c.numFmt='#,##0.00';if(j===7)c.numFmt='0.0%';});r++;});
+    [6,16,44,16,16,14,8,12].forEach((w,i)=>ws.getColumn(i+1).width=w);
+    ws.views=[{state:'frozen',ySplit:1}]; ws.autoFilter={from:{row:1,column:1},to:{row:1,column:8}};
+    downloadBuf(await wb.xlsx.writeBuffer(),'RANKING_COMPRAS_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  }
+  btnXlsx.addEventListener('click',exportRanking);
+
+  window.__initDashC=function(){ if(jaCarregou)return; jaCarregou=true; aplicaAtalho('tudo'); atualizar(); };
+})();
+</script>
+
+
+</body></html>
